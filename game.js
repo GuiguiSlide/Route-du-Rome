@@ -33,44 +33,49 @@ camera = scene.cameras.main;
 camera.setBounds(0,0,2000,1200);
 
 /* ===== HERO ===== */
-const g = scene.make.graphics({x:0,y:0,add:false});
+const scene = this;
 
-function hero(frame){
+/* ===== HERO ZELDA STABLE ===== */
+const g = scene.make.graphics({ x: 0, y: 0, add: false });
+
+function drawHero(){
 
 g.clear();
 
+// ombre
+g.fillStyle(0x000000, 0.2);
+g.fillEllipse(20,55,30,10);
+
 // tête
 g.fillStyle(0xf2c9a0);
-g.fillCircle(20,10,10);
+g.fillCircle(20,12,10);
 
-// cheveux
+// cheveux (style Link sans bonnet)
 g.fillStyle(0x1d1e3c);
-g.fillRect(10,0,20,8);
+g.fillRect(10,2,20,10);
 
-// corps FT
+// tunique France Travail
 g.fillStyle(0x00A859);
-g.fillRect(8,18,24,28);
+g.fillRect(8,22,24,30);
 
-// jambes anim
+// ceinture bleue
+g.fillStyle(0x003189);
+g.fillRect(8,30,24,4);
+
+// jambes
 g.fillStyle(0x1d1e3c);
+g.fillRect(12,52,6,14);
+g.fillRect(22,52,6,14);
 
-if(frame===0){
-g.fillRect(12,46,6,14);
-g.fillRect(22,46,6,14);
-}
-if(frame===1){
-g.fillRect(10,46,6,14);
-g.fillRect(24,46,6,14);
-}
-if(frame===2){
-g.fillRect(14,46,6,14);
-g.fillRect(20,46,6,14);
+g.generateTexture('hero', 40, 70);
+
 }
 
-g.generateTexture("hero"+frame,40,60);
-}
+drawHero();
 
-hero(0); hero(1); hero(2);
+/* PLAYER */
+player = scene.physics.add.sprite(300, 400, 'hero');
+player.setCollideWorldBounds(true);
 
 /* PLAYER */
 player = scene.physics.add.sprite(300,400,"hero0");
