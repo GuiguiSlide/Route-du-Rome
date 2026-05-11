@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RPG Métiers 35 — Saint-Malo</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.70.0/phaser.min.js"></script>
+
+<style>
+body{
+margin:0;
+overflow:hidden;
+font-family:Arial;
+background:#0b1220;
+}
+
+#hud{
+position:absolute;
+inset:0;
+pointer-events:none;
+color:white;
+}
+
+#quest{
+position:absolute;
+top:15px;
+left:15px;
+background:rgba(0,49,137,0.85);
+padding:12px;
+border:2px solid #00A859;
+border-radius:12px;
+width:300px;
+}
+
+#npcBox{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#0d1728;
+border:3px solid #00A859;
+padding:16px;
+border-radius:12px;
+width:700px;
+display:none;
+pointer-events:auto;
+}
+
+.choice{
+background:rgba(255,255,255,0.08);
+margin-top:8px;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="hud">
+
+<div id="quest">
+<b id="qTitle">Mission : Découvrir Saint-Malo</b>
+<p id="qDesc">Explore la ville pour rencontrer des métiers.</p>
+</div>
+
+<div id="npcBox">
+<div id="npcText">Bonjour explorateur !</div>
+
+<div class="choice" onclick="answer(1)">Je veux travailler dehors</div>
+<div class="choice" onclick="answer(2)">Je veux voyager</div>
+<div class="choice" onclick="answer(3)">Je veux un métier utile</div>
+</div>
+
+</div>
+
+<script>
+
+const config={
+type:Phaser.AUTO,
+width:window.innerWidth,
+height:window.innerHeight,
+physics:{default:"arcade",arcade:{debug:false}},
+scene:{preload,create,update}
+};
+
+let player,npc,cursors;
+let questStage=0;
+let moving=false;
+
+new Phaser.Game(config);
+
+function preload(){}
+
+function create(){
+
+const w=this.scale.width;
+const h=this.scale.height;
+
+/* ===== MAP SAINT-MALO STYLE ZELDA ===== */
+
+// mer
+this.add.rectangle(w/2,h-100,w,200,0x1e4d7a);
+
+// plage
+this.beach=this.add.rectangle(400,500,500,200,0xd9c9a5);
+
+// ville intra muros
+this.city=this.add.rectangle(900,350,500,350,0xc9b28f);
+
+// port
+this.port=this.add.rectangle(1200,600,400,250,0x5e432b);
+
+/* ===== NPC ===== */
+npc=this.physics.add.sprite(900,350,null);
+
+/* ===== HERO ZELDA ===== */
+
+const g=this.make.graphics({x:0,y:0,add:false});
+
+function drawHero(frame){
+
+g.clear();
+
+// tête
+g.fillStyle(0xf2c9a0);
+g.fillCircle(20,10,10);
+
+// cheveux
+g.fillStyle(0x1d1e3c);
+g.fillRect(10,0,20,8);
+
+// tunique FT
+g.fillStyle(0x00A859);
+g.fillRect(8,18,24,28);
+
+// jambes animation
+g.fillStyle(0x1d1e3c);
+
+if(frame===0){
+g.fillRect(12,46,6,14);
+g.fillRect(22,46,6,14);
+}
+if(frame===1){
+g.fillRect(10,46,6,14);
+g.fillRect(24,46,6,14);
+}
+if(frame===2){
+g.fillRect(14,46,6,14);
+g.fillRect(20,46,6,14);
+}
+
+g.generateTexture('hero'+frame,40,60);
+}
+
+drawHero(0);
+drawHero(1);
+drawHero(2);
+
+player=this.physics.add.sprite(300,500,'hero0');
+player.setCollideWorldBounds(true);
+player.frame=0;
+player.anim=0;
+
+/* collisions simples */
+this.physics.add.collider(player);
+
+/* input */
+cursors=this.input.keyboard.createCursorKeys();
+
+/* interaction */
+this.input.keyboard.on('keydown-E',()=>{
+
+if(Phaser.Math.Distance.Between(player.x,player.y,npc.x,npc.y)<100){
+document.getElementById("npcBox").style.display="block";
+}
+
+});
+
+}
+
+function update(){
+
+player.body.setVelocity(0);
+
+moving=false;
+
+if(cursors.left.isDown){player.body.setVelocityX(-220);moving=true;}
+if(cursors.right.isDown){player.body.setVelocityX(220);moving=true;}
+if(cursors.up.isDown){player.body.setVelocityY(-220);moving=true;}
+if(cursors.down.isDown){player.body.setVelocityY(220);moving=true;}
+
+/* animation marche */
+if(moving){
+player.anim++;
+if(player.anim>10){
+player.frame=(player.frame+1)%3;
+player.setTexture("hero"+player.frame);
+player.anim=0;
+}
+}else{
+player.setTexture("hero0");
+}
+
+/* zones métier */
+
+if(player.x>1100){
+document.getElementById("qTitle").innerText="Mission : Le Port ⚓";
+document.getElementById("qDesc").innerText="Découvre les métiers maritimes.";
+questStage=1;
+}
+
+if(player.x<600 && player.y>400){
+document.getElementById("qTitle").innerText="Mission : Plage 🌊";
+document.getElementById("qDesc").innerText="Explore les métiers du tourisme.";
+questStage=2;
+}
+
+}
+
+function answer(id){
+
+let txt=document.getElementById("npcText");
+
+if(id===1) txt.innerText="Les métiers du terrain sont essentiels !";
+if(id===2) txt.innerText="Le transport maritime recrute beaucoup !";
+if(id===3) txt.innerText="Très bon choix pour la société !";
+
+setTimeout(()=>{
+document.getElementById("npcBox").style.display="none";
+},2000);
+
+}
+
+</script>
+
+</body>
+</html>
