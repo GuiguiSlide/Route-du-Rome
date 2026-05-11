@@ -1,5 +1,4 @@
 let player, npc, cursors;
-let camera;
 let dialogueOpen = false;
 
 const config = {
@@ -10,7 +9,11 @@ physics: {
 default: "arcade",
 arcade: { debug: false }
 },
-scene: { preload, create, update }
+scene: {
+preload,
+create,
+update
+}
 };
 
 new Phaser.Game(config);
@@ -20,22 +23,30 @@ function preload(){}
 function create(){
 
 const scene = this;
+const w = this.scale.width;
+const h = this.scale.height;
 
-/* ===== MAP SAINT-MALO ZELDA STYLE ===== */
-scene.add.rectangle(800,400,2000,1200,0x1e4d7a); // mer
+/* ======================
+   🌍 MAP SAINT-MALO
+====================== */
 
-scene.add.rectangle(500,500,600,400,0xd9c9a5); // plage
-scene.add.rectangle(1000,350,600,500,0xc9b28f); // ville
-scene.add.rectangle(1500,600,500,300,0x5e432b); // port
+// mer
+scene.add.rectangle(w/2, h-100, w*2, 300, 0x1e4d7a);
 
-/* ===== CAMERA ===== */
-camera = scene.cameras.main;
-camera.setBounds(0,0,2000,1200);
+// plage
+scene.add.rectangle(400, 500, 500, 250, 0xd9c9a5);
 
-/* ===== HERO ===== */
-const scene = this;
+// ville intra-muros
+scene.add.rectangle(900, 350, 600, 500, 0xc9b28f);
 
-/* ===== HERO ZELDA STABLE ===== */
+// port
+scene.add.rectangle(1500, 600, 500, 300, 0x5e432b);
+
+
+/* ======================
+   🧍 HERO (ZELDA FIX)
+====================== */
+
 const g = scene.make.graphics({ x: 0, y: 0, add: false });
 
 function drawHero(){
@@ -43,57 +54,71 @@ function drawHero(){
 g.clear();
 
 // ombre
-g.fillStyle(0x000000, 0.2);
-g.fillEllipse(20,55,30,10);
+g.fillStyle(0x000000, 0.25);
+g.fillEllipse(20, 62, 30, 10);
 
 // tête
 g.fillStyle(0xf2c9a0);
-g.fillCircle(20,12,10);
+g.fillCircle(20, 12, 10);
 
-// cheveux (style Link sans bonnet)
+// cheveux (sans bonnet)
 g.fillStyle(0x1d1e3c);
-g.fillRect(10,2,20,10);
+g.fillRect(10, 2, 20, 10);
 
 // tunique France Travail
 g.fillStyle(0x00A859);
-g.fillRect(8,22,24,30);
+g.fillRect(8, 22, 24, 30);
 
 // ceinture bleue
 g.fillStyle(0x003189);
-g.fillRect(8,30,24,4);
+g.fillRect(8, 30, 24, 4);
 
 // jambes
 g.fillStyle(0x1d1e3c);
-g.fillRect(12,52,6,14);
-g.fillRect(22,52,6,14);
+g.fillRect(12, 52, 6, 14);
+g.fillRect(22, 52, 6, 14);
 
-g.generateTexture('hero', 40, 70);
+g.generateTexture("hero", 40, 70);
 
 }
 
 drawHero();
 
 /* PLAYER */
-player = scene.physics.add.sprite(300, 400, 'hero');
+player = scene.physics.add.sprite(300, 400, "hero");
 player.setCollideWorldBounds(true);
 
-/* PLAYER */
-player = scene.physics.add.sprite(300,400,"hero0");
-player.setCollideWorldBounds(true);
 
-/* NPC */
-npc = scene.physics.add.sprite(900,350,null);
+/* ======================
+   ⚓ NPC
+====================== */
 
-/* CAMERA FOLLOW (ZELDA FEEL) */
-camera.startFollow(player);
+npc = scene.physics.add.sprite(900, 350, null);
+npc.setImmovable(true);
 
-/* INPUT */
+
+/* ======================
+   🎥 CAMERA ZELDA
+====================== */
+
+scene.cameras.main.startFollow(player);
+scene.cameras.main.setZoom(1.3);
+
+
+/* ======================
+   🎮 INPUT
+====================== */
+
 cursors = scene.input.keyboard.createCursorKeys();
 
-/* INTERACTION */
-scene.input.keyboard.on("keydown-E",()=>{
 
-if(Phaser.Math.Distance.Between(player.x,player.y,npc.x,npc.y)<120){
+/* ======================
+   💬 INTERACTION NPC
+====================== */
+
+scene.input.keyboard.on("keydown-E", () => {
+
+if (distance(player, npc) < 120) {
 openDialogue();
 }
 
@@ -101,53 +126,82 @@ openDialogue();
 
 }
 
+
+/* ======================
+   🔁 UPDATE LOOP
+====================== */
+
 function update(){
 
 if(dialogueOpen) return;
 
 player.body.setVelocity(0);
 
-let moving=false;
+let moving = false;
 
-if(cursors.left.isDown){player.body.setVelocityX(-220);moving=true;}
-if(cursors.right.isDown){player.body.setVelocityX(220);moving=true;}
-if(cursors.up.isDown){player.body.setVelocityY(-220);moving=true;}
-if(cursors.down.isDown){player.body.setVelocityY(220);moving=true;}
-
-if(moving){
-player.frameIndex = (player.frameIndex||0)+1;
-
-if(player.frameIndex>10){
-player.anim = (player.anim||0)+1;
-player.anim%=3;
-player.setTexture("hero"+player.anim);
-player.frameIndex=0;
-}
-}else{
-player.setTexture("hero0");
+if(cursors.left.isDown){
+player.body.setVelocityX(-220);
+moving = true;
 }
 
+if(cursors.right.isDown){
+player.body.setVelocityX(220);
+moving = true;
 }
+
+if(cursors.up.isDown){
+player.body.setVelocityY(-220);
+moving = true;
+}
+
+if(cursors.down.isDown){
+player.body.setVelocityY(220);
+moving = true;
+}
+
+/* (option animation simple future upgrade) */
+player.flipX = cursors.left.isDown;
+
+}
+
+
+/* ======================
+   📏 DISTANCE NPC
+====================== */
+
+function distance(a,b){
+return Phaser.Math.Distance.Between(a.x,a.y,b.x,b.y);
+}
+
+
+/* ======================
+   💬 DIALOGUE
+====================== */
 
 function openDialogue(){
-document.getElementById("dialogue").style.display="block";
-dialogueOpen=true;
+document.getElementById("dialogue").style.display = "block";
+dialogueOpen = true;
 
 document.getElementById("dialogueText").innerText =
-"Morgane : Bienvenue dans les métiers du territoire 35.";
+"Morgane : Bienvenue à Saint-Malo ! Découvre les métiers du territoire.";
 }
 
-function choose(id){
 
-let t=document.getElementById("dialogueText");
+/* ======================
+   🎯 CHOIX
+====================== */
 
-if(id===1) t.innerText="Métier terrain détecté (logistique / port)";
-if(id===2) t.innerText="Mobilité internationale possible";
-if(id===3) t.innerText="Impact social fort identifié";
+window.choose = function(id){
 
-setTimeout(()=>{
-document.getElementById("dialogue").style.display="none";
-dialogueOpen=false;
-},2000);
+let t = document.getElementById("dialogueText");
 
-}
+if(id === 1) t.innerText = "Métiers terrain : logistique, port, BTP.";
+if(id === 2) t.innerText = "Mobilité : transport maritime & international.";
+if(id === 3) t.innerText = "Impact social et utilité publique.";
+
+setTimeout(() => {
+document.getElementById("dialogue").style.display = "none";
+dialogueOpen = false;
+}, 2000);
+
+};
