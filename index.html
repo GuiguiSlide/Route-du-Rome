@@ -305,6 +305,10 @@ body {
   <div class="game-title">LA ROUTE<br><span>DU ROME</span></div>
   <div class="game-sub">Découvre les métiers du 35</div>
 
+  <div id="video-wrap">
+  <video id="game-video" playsinline></video>
+</div>
+
   <div class="pick-row">
     <!-- ÉLIO -->
     <div class="hero-card" onclick="startWithHero('elio')">
@@ -424,7 +428,7 @@ body {
       </video>
       <div id="skip-btn"><button onclick="skipVideo()">⏭ Passer la vidéo</button></div>
     </div>
-
+   
     <!-- DIALOGUE -->
     <div id="dlg-box">
       <div class="dlg-head">
@@ -538,25 +542,48 @@ let mapZoomed = false;
 
 // ── DÉMARRAGE ────────────────────────────────────────────────
 function startWithHero(id) {
-  hero = HEROES[id];
-  flashScreen(() => {
-    // Passer à l'écran jeu
-    document.getElementById('screen-pick').classList.remove('active');
-    document.getElementById('screen-game').classList.add('active');
-    // Mettre à jour UI avec le héros
-    document.getElementById('tb-img').src = hero.portrait;
-    document.getElementById('tb-name').textContent = hero.name;
-    document.getElementById('hero-marker-img').src = hero.portrait;
-    document.getElementById('hero-marker-name').textContent = hero.name + ' · Saint-Malo';
-    document.getElementById('dlg-portrait').src = hero.portrait;
-    document.getElementById('dlg-name').textContent = hero.name;
-    document.getElementById('dlg-role').textContent = hero.role;
-    document.getElementById('popup-portrait').src = hero.portrait;
-    document.getElementById('popup-name').textContent = hero.name;
-    document.getElementById('popup-bio').innerHTML = hero.bio;
-    // Lancer la séquence
-    startGameSequence();
-  });
+
+  const hero = heroes[id];
+  selectedHero = hero;
+
+  // Animation carte / zoom existant
+  zoomMap(hero);
+
+  // Attend la fin de l'animation
+  setTimeout(() => {
+
+    const videoWrap = document.getElementById('video-wrap');
+    const video = document.getElementById('game-video');
+    const skipBtn = document.getElementById('skip-btn');
+
+    // Sélection vidéo
+    if(id === 'elio') {
+      video.src = './Elio1.mp4';
+    } else {
+      video.src = './Elia1.mp4';
+    }
+
+    // Affichage
+    videoWrap.classList.add('show');
+
+    if(skipBtn){
+      skipBtn.classList.add('show');
+    }
+
+    // Recharge vidéo
+    video.load();
+
+    // Lance lecture
+    video.play().catch(err => {
+      console.log('Erreur vidéo :', err);
+    });
+
+    // Fin vidéo => jeu
+    video.onended = () => {
+      window.location.href = 'jeu.html?hero=' + id;
+    };
+
+  }, 2500);
 }
 
 function startGameSequence() {
@@ -600,8 +627,7 @@ function startVideo() {
 }
 
 function skipVideo() {
-  const vid = document.getElementById('game-video');
-  vid.currentTime = vid.duration - 0.1;
+  window.location.href = 'jeu.html?hero=' + selectedHero.id;
 }
 
 // ── DIALOGUE HÉROS (intro) ────────────────────────────────────
