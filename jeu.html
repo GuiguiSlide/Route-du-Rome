@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Route du Rome – RPG</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #003189;
+  --blue2: #0044bb;
+  --green: #00A859;
+  --green2: #00d16d;
+  --gold: #F5C518;
+  --dark: #060e24;
+  --panel: rgba(4,12,38,0.97);
+  --border: rgba(0,168,89,0.6);
+  --text: #e8f0ff;
+  --muted: #7a8fb8;
+  --xp-color: #00d16d;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--dark);
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== TOPBAR ===== */
+#topbar {
+  background: var(--blue);
+  border-bottom: 3px solid var(--green);
+  padding: 0 18px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 1000;
+}
+.topbar-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.topbar-logo .ft-badge {
+  background: var(--green);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.topbar-logo .game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.topbar-logo .game-title span { color: var(--green); }
+
+/* XP bar */
+#xp-bar-wrap {
+  display: flex; align-items: center; gap: 10px;
+}
+.level-badge {
+  background: var(--gold);
+  color: #1a0e00;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.xp-track {
+  width: 180px;
+  height: 14px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--green2));
+  border-radius: 7px;
+  transition: width 0.6s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 0 10px rgba(0,168,89,0.6);
+}
+.xp-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+/* Boutons topbar */
+.topbar-btns { display: flex; gap: 8px; }
+.tbtn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex; align-items: center; gap: 5px;
+}
+.tbtn:hover { background: rgba(0,168,89,0.2); border-color: var(--green); }
+.tbtn.active { background: rgba(0,168,89,0.25); border-color: var(--green); color: var(--green); }
+
+/* ===== MAIN LAYOUT ===== */
+#main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== MAP ===== */
+#map {
+  flex: 1;
+  z-index: 1;
+}
+
+/* Leaflet overrides */
+.leaflet-container { background: #1a3a5c; }
+.leaflet-tile-pane { filter: saturate(0.85) brightness(0.75) hue-rotate(10deg); }
+
+/* Marqueur NPC custom */
+.npc-marker {
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+}
+.npc-icon-wrap {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--green);
+  background: var(--panel);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 0 3px rgba(0,168,89,0.25), 0 4px 16px rgba(0,0,0,0.5);
+  transition: transform .2s;
+  animation: floatNPC 2.5s ease-in-out infinite;
+}
+.npc-icon-wrap:hover { transform: scale(1.15); }
+.npc-label {
+  margin-top: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.npc-icon-wrap.done { border-color: var(--gold); filter: grayscale(0.4); }
+.npc-icon-wrap.done::after {
+  content: '✅';
+  position: absolute;
+  font-size: 16px;
+  bottom: -4px; right: -4px;
+}
+.npc-icon-wrap { position: relative; }
+
+@keyframes floatNPC {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Marqueur joueur */
+.player-marker-wrap {
+  display: flex; flex-direction: column; align-items: center;
+}
+.player-dot {
+  width: 34px; height: 34px;
+  background: var(--blue);
+  border: 3px solid var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 0 4px rgba(0,168,89,0.3), 0 0 20px rgba(0,168,89,0.4);
+  animation: playerPulse 2s ease-in-out infinite;
+}
+@keyframes playerPulse {
+  0%,100% { box-shadow: 0 0 0 4px rgba(0,168,89,0.3), 0 0 20px rgba(0,168,89,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(0,168,89,0.15), 0 0 30px rgba(0,168,89,0.6); }
+}
+.player-name {
+  background: var(--blue);
+  border: 1px solid var(--green);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 8px;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* Zone de proximité */
+.prox-circle { pointer-events: none; }
+
+/* ===== PANNEAU LATÉRAL (carnet) ===== */
+#side-panel {
+  width: 340px;
+  background: var(--panel);
+  border-left: 2px solid var(--border);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+#side-panel.open { display: flex; }
+
+.panel-header {
+  background: var(--blue);
+  border-bottom: 2px solid var(--green);
+  padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-header h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+.panel-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; transition: color .2s;
+}
+.panel-close:hover { color: #fff; }
+
+.panel-body { flex:1; overflow-y: auto; padding: 16px; }
+.panel-body::-webkit-scrollbar { width: 5px; }
+.panel-body::-webkit-scrollbar-track { background: transparent; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Cards métiers dans le carnet */
+.job-card {
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: all .3s;
+  opacity: 0.4;
+}
+.job-card.unlocked {
+  opacity: 1;
+  border-color: var(--border);
+  background: rgba(0,168,89,0.06);
+}
+.job-card .card-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.job-card .card-icon {
+  font-size: 28px;
+  width: 46px; height: 46px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.job-card .card-info h3 { font-size: 14px; font-weight: 800; color: #fff; }
+.job-card .card-info p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.job-card .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+  background: rgba(0,168,89,0.15);
+  color: var(--green);
+  border: 1px solid rgba(0,168,89,0.3);
+}
+.job-card .locked-msg {
+  text-align: center; color: var(--muted); font-size: 11px;
+  padding: 8px 0;
+}
+.xp-earned-badge {
+  background: var(--gold);
+  color: #1a0e00;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+/* ===== DIALOGUE RPG ===== */
+#dialogue-overlay {
+  display: none;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+#dialogue-overlay.active { display: block; pointer-events: all; }
+
+#dialogue-box {
+  background: var(--panel);
+  border-top: 3px solid var(--green);
+  border-left: 2px solid var(--border);
+  border-right: 2px solid var(--border);
+  margin: 0 auto 0;
+  max-width: 860px;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 -10px 60px rgba(0,0,0,0.7);
+  animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
+
+.dlg-header {
+  background: var(--blue);
+  padding: 10px 18px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.dlg-avatar {
+  font-size: 32px;
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--ft-green);
+}
+.dlg-npc-name { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--green); }
+.dlg-npc-role { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.dlg-job-tag {
+  margin-left: auto;
+  background: rgba(0,168,89,0.15);
+  border: 1px solid var(--border);
+  color: var(--green);
+  font-size: 11px; font-weight: 800;
+  padding: 4px 12px; border-radius: 20px;
+}
+
+.dlg-body { padding: 16px 20px; min-height: 80px; }
+
+#dlg-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  min-height: 44px;
+}
+#dlg-text .highlight { color: var(--gold); font-weight: 800; }
+
+/* Barre de progression dialogue */
+.dlg-progress {
+  display: flex; gap: 4px; margin-top: 10px;
+}
+.dlg-step {
+  height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.12);
+  flex: 1;
+  transition: background .4s;
+}
+.dlg-step.done { background: var(--green); }
+.dlg-step.current { background: var(--gold); }
+
+/* Choix de réponses */
+#choices-area {
+  padding: 0 20px 16px;
+  display: none;
+}
+#choices-area.visible { display: block; }
+
+.choice-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  text-align: left;
+  transition: all .2s;
+}
+.choice-btn:hover {
+  background: rgba(0,168,89,0.15);
+  border-color: var(--green);
+  color: #fff;
+  transform: translateX(4px);
+}
+.choice-btn .choice-letter {
+  width: 24px; height: 24px;
+  background: var(--blue2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+}
+
+/* Footer dialogue */
+.dlg-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 8px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.dlg-continue {
+  font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 5px;
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.dlg-key {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+}
+.dlg-skip-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted); font-size: 11px; font-family: 'Nunito', sans-serif;
+  padding: 4px 12px; border-radius: 6px; cursor: pointer;
+  transition: all .2s;
+}
+.dlg-skip-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+/* ===== VIDÉO MÉTIER ===== */
+#video-overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(8px);
+  z-index: 600;
+  align-items: center; justify-content: center;
+  flex-direction: column;
+}
+#video-overlay.active { display: flex; }
+
+.video-modal {
+  background: var(--panel);
+  border: 2px solid var(--ft-green);
+  border-radius: 18px;
+  width: 700px; max-width: 95%;
+  overflow: hidden;
+  animation: modalIn .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+}
+@keyframes modalIn {
+  from { transform: scale(.85) translateY(20px); opacity:0; }
+  to { transform: scale(1) translateY(0); opacity:1; }
+}
+.vm-header {
+  background: var(--green);
+  padding: 14px 22px;
+  display: flex; align-items: center; gap: 12px;
+}
+.vm-header .vm-icon { font-size: 32px; }
+.vm-header .vm-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; line-height: 1.5; }
+.vm-header .vm-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 3px; font-family: 'Nunito', sans-serif; }
+.vm-body { padding: 22px; }
+.video-ph {
+  background: rgba(0,0,0,0.5);
+  border: 2px dashed rgba(0,168,89,0.35);
+  border-radius: 12px;
+  height: 210px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  cursor: pointer;
+  transition: all .3s;
+  position: relative;
+  overflow: hidden;
+}
+.video-ph:hover { border-color: var(--green); background: rgba(0,168,89,0.07); }
+.play-ring {
+  width: 64px; height: 64px;
+  border: 3px solid var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  transition: transform .3s;
+  box-shadow: 0 0 30px rgba(0,168,89,0.4);
+}
+.video-ph:hover .play-ring { transform: scale(1.1); }
+.video-ph .ph-title { color: #fff; font-size: 14px; font-weight: 800; }
+.video-ph .ph-sub { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.5; }
+.video-ph .dur-tag {
+  position: absolute; top:10px; right:10px;
+  background: rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:3px 8px; border-radius:4px;
+}
+.vm-reward {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(245,197,24,0.1);
+  border: 1px solid rgba(245,197,24,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+}
+.vm-reward .r-icon { font-size: 22px; }
+.vm-reward .r-text { font-size: 13px; font-weight: 800; color: var(--gold); }
+.vm-reward .r-sub { font-size: 11px; color: rgba(245,197,24,0.6); }
+.vm-actions {
+  display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;
+}
+.btn-ft {
+  padding: 10px 26px; border-radius: 8px; border: none;
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all .2s;
+}
+.btn-primary { background: var(--green); color: #fff; box-shadow: 0 4px 14px rgba(0,168,89,0.35); }
+.btn-primary:hover { background: var(--green2); transform: translateY(-2px); }
+.btn-ghost { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+.btn-ghost:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* ===== NOTIFICATION TOAST ===== */
+#toast {
+  position: absolute;
+  top: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--panel);
+  border: 2px solid var(--ft-green);
+  border-radius: 12px;
+  padding: 12px 22px;
+  display: flex; align-items: center; gap: 12px;
+  z-index: 800;
+  opacity: 0;
+  transition: opacity .3s, top .3s;
+  pointer-events: none;
+  box-shadow: 0 8px 40px rgba(0,168,89,0.3);
+}
+#toast.show { opacity: 1; top: 24px; }
+#toast .toast-icon { font-size: 24px; }
+#toast .toast-msg { font-size: 13px; font-weight: 800; color: #fff; }
+#toast .toast-sub { font-size: 11px; color: var(--muted); }
+
+/* ===== TITRE D'ÉCRAN ===== */
+#title-screen {
+  position: absolute;
+  top:0;left:0;right:0;bottom:0;
+  background: radial-gradient(ellipse at 50% 30%, #001a5e 0%, #000d22 70%);
+  z-index: 900;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0;
+}
+.ts-ft { background: var(--green); color:#fff; font-size:11px; font-weight:900; letter-spacing:2px; padding:5px 16px; border-radius:4px; text-transform:uppercase; margin-bottom:22px; }
+.ts-main {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 34px;
+  color: #fff;
+  text-align: center;
+  line-height: 1.4;
+  text-shadow: 0 0 40px rgba(0,168,89,0.5);
+  margin-bottom: 8px;
+}
+.ts-main span { color: var(--green); }
+.ts-subtitle { font-size: 13px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
+.ts-desc {
+  max-width: 500px; text-align: center;
+  font-size: 14px; color: #8899bb; line-height: 1.8;
+  margin-bottom: 40px;
+}
+.ts-desc strong { color: #fff; }
+.ts-jobs { display: flex; gap: 12px; margin-bottom: 50px; flex-wrap: wrap; justify-content: center; }
+.ts-job {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(0,168,89,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+  transition: all .3s;
+}
+.ts-job:hover { background: rgba(0,168,89,0.1); border-color: var(--green); transform: translateY(-3px); }
+.ts-job .tj-icon { font-size: 24px; }
+.ts-job .tj-name { font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 700; }
+.ts-start {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  padding: 16px 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 0 40px rgba(0,168,89,0.5);
+  animation: glowPulse 2s ease-in-out infinite;
+  transition: all .3s;
+}
+.ts-start:hover { background: var(--green2); transform: scale(1.04); }
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 30px rgba(0,168,89,0.5); }
+  50% { box-shadow: 0 0 60px rgba(0,168,89,0.8); }
+}
+.ts-hint { color: #334; font-size: 11px; margin-top: 16px; letter-spacing: 1px; }
+
+/* ===== VICTOIRE ===== */
+#victory-screen {
+  display: none;
+  position: absolute;
+  top:0;left:0;right:0;bottom:0;
+  background: radial-gradient(ellipse at 50% 40%, #001a5e 0%, #000d22 100%);
+  z-index: 900;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 40px;
+}
+#victory-screen h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px; color: var(--gold);
+  text-shadow: 0 0 40px rgba(245,197,24,0.5);
+  line-height: 1.4;
+}
+#victory-screen .vic-sub { color: var(--muted); font-size: 14px; max-width: 500px; line-height: 1.8; }
+.vic-jobs { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.vic-job {
+  background: rgba(0,168,89,0.12);
+  border: 2px solid var(--ft-green);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 28px;
+  text-align: center;
+}
+.vic-job p { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 800; }
+.vic-score { font-size: 16px; color: var(--muted); }
+.vic-score strong { color: var(--gold); font-size: 22px; }
+
+/* ===== CONTRÔLES CARTE ===== */
+#map-controls {
+  position: absolute;
+  bottom: 200px; right: 14px;
+  z-index: 400;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.map-ctrl-btn {
+  width: 40px; height: 40px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.map-ctrl-btn:hover { background: rgba(0,168,89,0.2); border-color: var(--green); }
+
+/* Bouton mouvement clavier sur la carte */
+#move-hint {
+  position: absolute;
+  bottom: 180px; left: 50%; transform: translateX(-50%);
+  z-index: 400;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+  pointer-events: none;
+}
+#move-hint .key { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:4px; }
+
+/* Gamepad indicator */
+#gamepad-bar {
+  position: absolute;
+  bottom: 0; left:0; right:0;
+  background: rgba(4,12,38,0.9);
+  border-top: 1px solid var(--border);
+  padding: 5px 16px;
+  display: flex; align-items:center; gap:8px;
+  font-size: 10px; color: var(--muted);
+  z-index: 400;
+}
+.gp-dot { width:7px; height:7px; border-radius:50%; background: #334; transition: background .3s; }
+.gp-dot.on { background: var(--green); box-shadow: 0 0 6px rgba(0,168,89,0.6); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="topbar-logo">
+    <div class="ft-badge">France Travail</div>
+    <div class="game-title">LA ROUTE <span>DU ROME</span></div>
+  </div>
+  <div id="xp-bar-wrap">
+    <div class="level-badge">NV.<span id="level-num">1</span></div>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-label"><span id="xp-cur">0</span> / <span id="xp-next">200</span> XP</div>
+  </div>
+  <div class="topbar-btns">
+    <button class="tbtn" id="btn-carnet" onclick="toggleCarnet()">📖 Carnet</button>
+    <button class="tbtn" id="btn-map" onclick="centerMap()">🗺️ Centrer</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="map"></div>
+
+  <!-- Panneau carnet -->
+  <div id="side-panel">
+    <div class="panel-header">
+      <h2>📖 Carnet Métiers</h2>
+      <button class="panel-close" onclick="toggleCarnet()">✕</button>
+    </div>
+    <div class="panel-body" id="carnet-body"></div>
+  </div>
+
+  <!-- Contrôles carte -->
+  <div id="map-controls">
+    <button class="map-ctrl-btn" onclick="movePlayer('up')">▲</button>
+    <button class="map-ctrl-btn" onclick="movePlayer('down')">▼</button>
+    <button class="map-ctrl-btn" onclick="movePlayer('left')">◀</button>
+    <button class="map-ctrl-btn" onclick="movePlayer('right')">▶</button>
+  </div>
+
+  <div id="move-hint">
+    <span class="key">Z</span><span class="key">Q</span><span class="key">S</span><span class="key">D</span>
+    ou flèches pour se déplacer ·
+    <span class="key">Espace</span> pour interagir
+  </div>
+
+  <!-- Overlay dialogue -->
+  <div id="dialogue-overlay">
+    <div id="dialogue-box">
+      <div class="dlg-header">
+        <div class="dlg-avatar" id="dlg-avatar">👨‍🌾</div>
+        <div>
+          <div class="dlg-npc-name" id="dlg-npc-name">Jean-Yves</div>
+          <div class="dlg-npc-role" id="dlg-npc-role">Agriculteur · Romebret</div>
+        </div>
+        <div class="dlg-job-tag" id="dlg-job-tag">🌾 Agriculture</div>
+      </div>
+      <div class="dlg-body">
+        <div id="dlg-text"></div>
+        <div class="dlg-progress" id="dlg-progress"></div>
+      </div>
+      <div id="choices-area"><!-- rempli dynamiquement --></div>
+      <div class="dlg-footer">
+        <div class="dlg-continue" id="dlg-continue">
+          <span class="dlg-key">Espace</span> ou <span class="dlg-key">✕</span> pour continuer
+        </div>
+        <button class="dlg-skip-btn" onclick="skipDialogue()">Passer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay vidéo -->
+  <div id="video-overlay">
+    <div class="video-modal">
+      <div class="vm-header">
+        <div class="vm-icon" id="vm-icon">🌾</div>
+        <div>
+          <div class="vm-title" id="vm-title">Agriculture</div>
+          <div class="vm-sub" id="vm-sub">Découverte métier · Ille-et-Vilaine</div>
+        </div>
+      </div>
+      <div class="vm-body">
+        <div class="video-ph" id="video-ph" onclick="playVideoMock()">
+          <div class="play-ring">▶</div>
+          <div class="ph-title" id="ph-title">Découvrir le métier</div>
+          <div class="ph-sub">Cliquez pour lancer la vidéo de présentation</div>
+          <div class="dur-tag" id="ph-dur">~4 min</div>
+        </div>
+        <div class="vm-reward">
+          <div class="r-icon">🏆</div>
+          <div>
+            <div class="r-text" id="vm-reward-text">+150 XP · Badge débloqué</div>
+            <div class="r-sub">Valide la quête pour gagner ta récompense</div>
+          </div>
+        </div>
+        <div class="vm-actions">
+          <button class="btn-ft btn-ghost" onclick="closeVideo()">Fermer</button>
+          <button class="btn-ft btn-primary" onclick="validateQuest()">✅ Quête accomplie !</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">
+    <div class="toast-icon" id="toast-icon">🎉</div>
+    <div>
+      <div class="toast-msg" id="toast-msg">Métier débloqué !</div>
+      <div class="toast-sub" id="toast-sub">+150 XP gagnés</div>
+    </div>
+  </div>
+
+  <!-- Barre gamepad -->
+  <div id="gamepad-bar">
+    <div class="gp-dot" id="gp-dot"></div>
+    <span id="gp-label">Manette non connectée · Branche une DualShock/DualSense USB ou Bluetooth</span>
+  </div>
+
+  <!-- Écran titre -->
+  <div id="title-screen">
+    <div class="ts-ft">France Travail · Ille-et-Vilaine</div>
+    <div class="ts-main">LA ROUTE<br><span>DU ROME</span></div>
+    <div class="ts-subtitle">Découvre les métiers du 35</div>
+    <div class="ts-desc">
+      Explore une <strong>vraie carte d'Ille-et-Vilaine</strong>.<br>
+      Rencontre 5 habitants, vis leurs dialogues, découvre leurs métiers<br>
+      et construis ton avenir avec France Travail !
+    </div>
+    <div class="ts-jobs">
+      <div class="ts-job"><div class="tj-icon">🌾</div><div class="tj-name">Agriculture</div></div>
+      <div class="ts-job"><div class="tj-icon">⚓</div><div class="tj-name">Maritime</div></div>
+      <div class="ts-job"><div class="tj-icon">⚙️</div><div class="tj-name">Métallurgie</div></div>
+      <div class="ts-job"><div class="tj-icon">🍽️</div><div class="tj-name">Restauration</div></div>
+      <div class="ts-job"><div class="tj-icon">🤝</div><div class="tj-name">Aide personne</div></div>
+    </div>
+    <button class="ts-start" onclick="startGame()">▶ COMMENCER</button>
+    <div class="ts-hint">ESPACE · ENTRÉE · BOUTON ✕ POUR DÉMARRER</div>
+  </div>
+
+  <!-- Écran victoire -->
+  <div id="victory-screen">
+    <div style="font-size:56px">🏆</div>
+    <h1>FÉLICITATIONS !</h1>
+    <p class="vic-sub">Tu as découvert les <strong style="color:#fff">5 métiers</strong> d'Ille-et-Vilaine et complété toutes les quêtes !<br>France Travail t'accompagne dans ta recherche d'emploi et de formation.</p>
+    <div class="vic-jobs">
+      <div class="vic-job">🌾<p>Agriculture</p></div>
+      <div class="vic-job">⚓<p>Maritime</p></div>
+      <div class="vic-job">⚙️<p>Métallurgie</p></div>
+      <div class="vic-job">🍽️<p>Restauration</p></div>
+      <div class="vic-job">🤝<p>Aide personne</p></div>
+    </div>
+    <div class="vic-score">Score final : <strong id="vic-xp">750 XP</strong></div>
+    <button class="ts-start" onclick="restartGame()" style="margin-top:10px;font-size:11px">🔄 REJOUER</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DONNÉES MÉTIERS
+// ============================================================
+const JOBS = [
+  {
+    id: 'agriculture',
+    name: 'Agriculture',
+    icon: '🌾',
+    npcName: 'Jean-Yves',
+    npcRole: 'Agriculteur · Saint-Aubin-du-Cormier',
+    lat: 48.605, lng: -1.750,
+    tags: ['Élevage laitier', 'Maraîchage', 'Apprentissage dispo', 'CAP/Bac Pro'],
+    description: "L'Ille-et-Vilaine est le 1er département breton pour l'élevage. Agriculteur, maraîcher, technicien agricole... des formations existent pour tous les niveaux.",
+    videoTitle: 'Agriculteur·trice en Ille-et-Vilaine',
+    videoDuration: '~4 min',
+    reward: '+150 XP · Badge 🌾 Agriculteur',
+    xp: 150,
+    dialogue: [
+      { text: "Bonjour, étranger ! Je suis <span class='highlight'>Jean-Yves</span>, agriculteur à Saint-Aubin depuis 22 ans. On élève des vaches laitières et on cultive des légumes.", choices: null },
+      { text: "L'Ille-et-Vilaine est le <span class='highlight'>1er département breton</span> pour l'élevage laitier. C'est un secteur qui recrute, surtout pour des profils en apprentissage !", choices: null },
+      { text: "Qu'est-ce qui t'intéresse dans l'agriculture ?", choices: [
+        { text: "Les animaux et l'élevage", next: 3 },
+        { text: "Les cultures et le maraîchage", next: 4 },
+        { text: "Je veux juste en savoir plus", next: 5 }
+      ]},
+      { text: "Super choix ! L'élevage laitier c'est passionnant. Le <span class='highlight'>BPREA (Brevet Professionnel)</span> en alternance te forme en 2 ans. France Travail peut financer la formation !", choices: null, toVideo: true },
+      { text: "Le maraîchage est en plein boom ! On cherche des <span class='highlight'>maraîchers bio</span> partout. Le CAP Agricole ou le Bac Pro CGEA sont des portes d'entrée idéales.", choices: null, toVideo: true },
+      { text: "Je t'ai préparé une vidéo qui présente tous les métiers de l'agriculture en Bretagne. Tu vas voir, c'est riche en possibilités !", choices: null, toVideo: true }
+    ]
+  },
+  {
+    id: 'maritime',
+    name: 'Maritime',
+    icon: '⚓',
+    npcName: 'Morgane',
+    npcRole: 'Officière de pêche · Saint-Malo',
+    lat: 48.649, lng: -2.025,
+    tags: ['Pêche hauturière', 'Ostréiculture', 'ENSM Saint-Malo', 'CAP Maritime'],
+    description: "Saint-Malo et le littoral breton offrent des métiers uniques : marin-pêcheur, officier de pêche, ostréiculteur, technicien portuaire...",
+    videoTitle: 'Les métiers de la mer en Bretagne',
+    videoDuration: '~5 min',
+    reward: '+150 XP · Badge ⚓ Marin',
+    xp: 150,
+    dialogue: [
+      { text: "Salut ! Moi c'est <span class='highlight'>Morgane</span>, officière de pêche à Saint-Malo. La mer, c'est ma vie depuis que je suis gamine !", choices: null },
+      { text: "Le secteur maritime breton, c'est <span class='highlight'>des milliers d'emplois</span> : marins-pêcheurs, mécaniciens navires, ostréiculteurs, techniciens portuaires...", choices: null },
+      { text: "La mer t'attire ? Qu'est-ce qui te parle le plus ?", choices: [
+        { text: "La pêche en haute mer", next: 3 },
+        { text: "L'aquaculture / huîtres", next: 4 },
+        { text: "Le travail à terre (port, logistique)", next: 5 }
+      ]},
+      { text: "La pêche hauturière, c'est intense mais passionnant ! L'<span class='highlight'>ENSM de Saint-Malo</span> forme les officiers. Le CAP Maritime ouvre aussi des portes rapidement.", choices: null, toVideo: true },
+      { text: "L'ostréiculture en Ille-et-Vilaine, c'est une tradition ! La baie du <span class='highlight'>Mont-Saint-Michel</span> est réputée mondialement. Des formations courtes existent via France Travail.", choices: null, toVideo: true },
+      { text: "Le port de Saint-Malo recrute des <span class='highlight'>logisticiens, manutentionnaires et techniciens</span> toute l'année. Pas besoin d'aller sur l'eau pour travailler dans le maritime !", choices: null, toVideo: true }
+    ]
+  },
+  {
+    id: 'metallurgie',
+    name: 'Métallurgie',
+    icon: '⚙️',
+    npcName: 'Patrick',
+    npcRole: 'Chef d\'atelier · Vitré',
+    lat: 48.455, lng: -2.049,
+    tags: ['Soudure / Chaudronnerie', 'CNC / Usinage', 'Alternance', 'Industrie 4.0'],
+    description: "L'industrie métallurgique en Ille-et-Vilaine recrute massivement : soudeurs, chaudronniers, techniciens CNC, maintenanciers...",
+    videoTitle: 'Industrie & Métallurgie dans le 35',
+    videoDuration: '~3 min',
+    reward: '+150 XP · Badge ⚙️ Technicien',
+    xp: 150,
+    dialogue: [
+      { text: "Bonjour ! Je suis <span class='highlight'>Patrick</span>, chef d'atelier chez un équipementier auto à Vitré. On fait de la chaudronnerie industrielle de précision.", choices: null },
+      { text: "La métallurgie, c'est <span class='highlight'>l'épine dorsale</span> de l'industrie bretonne. Et en ce moment, on manque cruellement de techniciens qualifiés !", choices: null },
+      { text: "Un poste t'intéresse ?", choices: [
+        { text: "Soudeur / Chaudronnier", next: 3 },
+        { text: "Technicien CNC / Usinage", next: 4 },
+        { text: "Maintenance industrielle", next: 5 }
+      ]},
+      { text: "Le soudeur est <span class='highlight'>le métier le plus recruté</span> de notre secteur ! Le CAP Soudure ou le Bac Pro TCI se fait en 2-3 ans, souvent en alternance payée.", choices: null, toVideo: true },
+      { text: "L'usinage CNC, c'est de la <span class='highlight'>haute technologie</span>. Les Bac Pro et BTS CPRP forment à la programmation de machines 5 axes. Les salaires sont très attractifs.", choices: null, toVideo: true },
+      { text: "La maintenance, c'est l'assurance de ne jamais chômer ! Le <span class='highlight'>Bac Pro MEI</span> ou le BTS Maintenance te donne accès à tous les secteurs industriels.", choices: null, toVideo: true }
+    ]
+  },
+  {
+    id: 'restauration',
+    name: 'Restauration',
+    icon: '🍽️',
+    npcName: 'Sophie',
+    npcRole: 'Cheffe cuisinière · Rennes',
+    lat: 48.672, lng: -1.847,
+    tags: ['Cuisine bretonne', 'CAP Cuisine', 'Hôtellerie', 'Pâtisserie'],
+    description: "La gastronomie bretonne rayonne mondialement. Cuisinier, pâtissier, serveur, responsable de salle... le secteur HCR recrute toute l'année.",
+    videoTitle: 'Restauration & Hôtellerie en Bretagne',
+    videoDuration: '~4 min',
+    reward: '+150 XP · Badge 🍽️ Cuisinier',
+    xp: 150,
+    dialogue: [
+      { text: "Bonjour ! Je suis <span class='highlight'>Sophie</span>, cheffe de cuisine à Rennes. Ma brigade régale chaque jour avec la gastronomie bretonne — crêpes, galettes, fruits de mer !", choices: null },
+      { text: "Le secteur de la restauration est <span class='highlight'>en tension permanente</span>. On cherche des cuisiniers, serveurs, pâtissiers à tous les niveaux. Même débutant, on peut démarrer vite !", choices: null },
+      { text: "Quel aspect de la restauration t'attire ?", choices: [
+        { text: "La cuisine / la création", next: 3 },
+        { text: "La salle / le contact client", next: 4 },
+        { text: "La gestion / management", next: 5 }
+      ]},
+      { text: "La cuisine, c'est un art ! Le <span class='highlight'>CAP Cuisine</span> se prépare en 1 an pour les adultes avec France Travail. Après, le ciel est la limite : étoiles Michelin, émissions TV...", choices: null, toVideo: true },
+      { text: "Le service en salle, c'est souvent <span class='highlight'>le premier contact avec le monde du travail</span>. Le Titre Pro Serveur ou le Bac Pro SAPAT se fait rapidement, et les extras payent bien !", choices: null, toVideo: true },
+      { text: "La gestion d'un restaurant, c'est du management et de la compta ! Le <span class='highlight'>BTS MHR</span> (Management Hôtellerie Restauration) ou le Bachelor ouvre les portes du management.", choices: null, toVideo: true }
+    ]
+  },
+  {
+    id: 'aide_personne',
+    name: 'Aide à la personne',
+    icon: '🤝',
+    npcName: 'Marie-Claire',
+    npcRole: 'Auxiliaire de vie · Fougères',
+    lat: 48.634, lng: -2.067,
+    tags: ['Aide à domicile', 'EHPAD', 'DEAES / ADVF', 'Sens & utilité'],
+    description: "Les métiers du lien et du care sont essentiels et très recruteurs. Aide à domicile, auxiliaire de vie, animateur en EHPAD... des formations rapides et financées.",
+    videoTitle: 'Aide à la personne en Ille-et-Vilaine',
+    videoDuration: '~3 min',
+    reward: '+150 XP · Badge 🤝 Aidant',
+    xp: 150,
+    dialogue: [
+      { text: "Bonjour ! Je suis <span class='highlight'>Marie-Claire</span>, auxiliaire de vie à Fougères depuis 8 ans. J'accompagne des personnes âgées et des adultes en situation de handicap.", choices: null },
+      { text: "Ces métiers du lien sont <span class='highlight'>parmi les plus recruteurs du 35</span>. Des milliers de postes à pourvoir chaque année, et une vraie reconnaissance qui grandit !", choices: null },
+      { text: "Qu'est-ce qui te touche dans ce secteur ?", choices: [
+        { text: "Accompagner les personnes âgées", next: 3 },
+        { text: "Soutenir les personnes handicapées", next: 4 },
+        { text: "Travailler en structure (EHPAD, IME...)", next: 5 }
+      ]},
+      { text: "L'accompagnement des seniors, c'est un métier de cœur ! Le <span class='highlight'>DEAVS ou le Titre ADVF</span> se prépare en quelques mois, financé par France Travail. Les emplois sont stables et locaux.", choices: null, toVideo: true },
+      { text: "Accompagner les personnes handicapées demande de l'empathie et des compétences. Le <span class='highlight'>DEAES (Diplôme d'État)</span> est la voie royale. Des contrats en alternance sont disponibles partout dans le 35.", choices: null, toVideo: true },
+      { text: "Travailler en EHPAD ou en IME, c'est être entouré d'une vraie équipe. Le <span class='highlight'>CAP AEPE ou AES</span> ouvre les portes. Certains établissements forment directement leurs futurs agents !", choices: null, toVideo: true }
+    ]
+  }
+];
+
+// ============================================================
+// ÉTAT DU JEU
+// ============================================================
+const state = {
+  started: false,
+  xp: 0,
+  level: 1,
+  xpPerLevel: 200,
+  completed: [],
+  currentJob: null,
+  dlgStep: 0,
+  dlgBranch: null,
+  awaitingChoice: false,
+  playerLat: 48.648, playerLng: -2.025
+};
+
+// ============================================================
+// CARTE LEAFLET
+// ============================================================
+let map, playerMarker, playerCircle, npcMarkers = {};
+
+// Lire le héros depuis l'URL ou localStorage
+var chosenHero = (new URLSearchParams(window.location.search)).get('hero') || localStorage.getItem('rdr_hero') || 'elio';
+var heroPortrait = chosenHero === 'elia' ? 'img/EliaPP.png' : 'img/ElioPP.png';
+var heroName = chosenHero === 'elia' ? 'Élia' : 'Élio';
+
+function initMap() {
+  map = L.map('map', {
+    center: [48.6484, -2.0254],
+    zoom: 13,
+    zoomControl: false,
+    attributionControl: true
+  });
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 18
+  }).addTo(map);
+
+  // Joueur
+  const playerIcon = L.divIcon({
+    className: '',
+    html: `<div class="player-marker-wrap">
+      <img src="" id="player-portrait-marker" onload="this.src=heroPortrait" style="width:46px;height:58px;object-fit:cover;border-radius:50%;border:2px solid #69408C;box-shadow:0 0 12px rgba(105,64,140,0.6);" />
+      <div class="player-name" id="player-name-marker">${heroName}</div>
+    </div>`,
+    iconSize: [50, 80],
+    iconAnchor: [25, 72]
+  });
+
+  playerMarker = L.marker([state.playerLat, state.playerLng], { icon: playerIcon, zIndexOffset: 1000 }).addTo(map);
+
+  playerCircle = L.circle([state.playerLat, state.playerLng], {
+    radius: 8000,
+    color: '#00A859',
+    fillColor: '#00A859',
+    fillOpacity: 0.05,
+    weight: 1.5,
+    opacity: 0.4,
+    className: 'prox-circle'
+  }).addTo(map);
+
+  // NPC markers
+  JOBS.forEach(job => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="npc-marker" id="npc-marker-${job.id}">
+        <div class="npc-icon-wrap" id="npc-icon-${job.id}">${job.icon}</div>
+        <div class="npc-label">${job.npcName}</div>
+      </div>`,
+      iconSize: [80, 70],
+      iconAnchor: [40, 60]
+    });
+    const marker = L.marker([job.lat, job.lng], { icon }).addTo(map);
+    marker.on('click', () => {
+      if (state.started && !state.completed.includes(job.id)) {
+        moveToNPC(job);
+      }
+    });
+    npcMarkers[job.id] = marker;
+  });
+}
+
+function moveToNPC(job) {
+  // Déplacer le joueur vers le NPC (approximatif)
+  const dlat = (job.lat - state.playerLat) * 0.85;
+  const dlng = (job.lng - state.playerLng) * 0.85;
+  state.playerLat += dlat;
+  state.playerLng += dlng;
+  updatePlayerPos(true);
+  setTimeout(() => startDialogue(job), 600);
+}
+
+function updatePlayerPos(fly = false) {
+  playerMarker.setLatLng([state.playerLat, state.playerLng]);
+  playerCircle.setLatLng([state.playerLat, state.playerLng]);
+  if (fly) {
+    map.flyTo([state.playerLat, state.playerLng], 10, { duration: 1.2 });
+  }
+}
+
+function movePlayer(dir) {
+  if (!state.started) return;
+  const step = 0.08;
+  if (dir === 'up') state.playerLat += step;
+  if (dir === 'down') state.playerLat -= step;
+  if (dir === 'left') state.playerLng -= step;
+  if (dir === 'right') state.playerLng += step;
+  updatePlayerPos();
+}
+
+function centerMap() {
+  map.flyTo([state.playerLat, state.playerLng], 9, { duration: 1 });
+}
+
+// ============================================================
+// DIALOGUE RPG
+// ============================================================
+function startDialogue(job) {
+  state.currentJob = job;
+  state.dlgStep = 0;
+  state.dlgBranch = null;
+  state.awaitingChoice = false;
+
+  document.getElementById('dlg-avatar').textContent = job.icon;
+  document.getElementById('dlg-npc-name').textContent = job.npcName;
+  document.getElementById('dlg-npc-role').textContent = job.npcRole;
+  document.getElementById('dlg-job-tag').textContent = `${job.icon} ${job.name}`;
+
+  // Barre de progression
+  const prog = document.getElementById('dlg-progress');
+  prog.innerHTML = '';
+  job.dialogue.forEach((_, i) => {
+    const s = document.createElement('div');
+    s.className = 'dlg-step';
+    s.id = `dlg-step-${i}`;
+    prog.appendChild(s);
+  });
+
+  document.getElementById('dialogue-overlay').classList.add('active');
+  showDlgStep(0);
+}
+
+function showDlgStep(idx) {
+  const job = state.currentJob;
+  if (!job) return;
+  const steps = job.dialogue;
+  if (idx >= steps.length) { closeDlgOpenVideo(); return; }
+
+  state.dlgStep = idx;
+  const step = state.dlgBranch !== null ? steps[state.dlgBranch] : steps[idx];
+  state.dlgBranch = null;
+
+  // Mettre à jour barre de progression
+  steps.forEach((_, i) => {
+    const el = document.getElementById(`dlg-step-${i}`);
+    if (!el) return;
+    el.className = 'dlg-step ' + (i < idx ? 'done' : i === idx ? 'current' : '');
+  });
+
+  // Texte avec effet machine à écrire
+  typewriterText('dlg-text', step.text, 22, () => {
+    if (step.choices) {
+      showChoices(step.choices);
+    }
+  });
+
+  // Choix ou continuer
+  const choicesArea = document.getElementById('choices-area');
+  choicesArea.innerHTML = '';
+  choicesArea.classList.remove('visible');
+  const cont = document.getElementById('dlg-continue');
+  cont.style.display = step.choices ? 'none' : 'flex';
+}
+
+function typewriterText(elId, html, speed, cb) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const full = tmp.innerHTML;
+  let i = 0;
+  let tag = false;
+  let buf = '';
+  const timer = setInterval(() => {
+    if (i >= full.length) {
+      el.innerHTML = full;
+      clearInterval(timer);
+      if (cb) cb();
+      return;
+    }
+    const ch = full[i];
+    if (ch === '<') tag = true;
+    if (tag) {
+      buf += ch;
+      if (ch === '>') { tag = false; el.innerHTML += buf; buf = ''; }
+    } else {
+      el.innerHTML += ch;
+    }
+    i++;
+  }, speed);
+}
+
+function showChoices(choices) {
+  const area = document.getElementById('choices-area');
+  area.innerHTML = '';
+  choices.forEach((c, i) => {
+    const letters = ['A', 'B', 'C', 'D'];
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span>${c.text}`;
+    btn.onclick = () => selectChoice(c);
+    area.appendChild(btn);
+  });
+  area.classList.add('visible');
+  state.awaitingChoice = true;
+  document.getElementById('dlg-continue').style.display = 'none';
+}
+
+function selectChoice(choice) {
+  const area = document.getElementById('choices-area');
+  area.classList.remove('visible');
+  state.awaitingChoice = false;
+  state.dlgBranch = choice.next;
+  const step = state.currentJob.dialogue[choice.next];
+  document.getElementById('dlg-continue').style.display = 'flex';
+
+  typewriterText('dlg-text', step.text, 22, () => {
+    if (step.toVideo) {
+      // Le prochain clic ouvre la vidéo
+      state.dlgBranch = 'toVideo';
+    }
+  });
+
+  // Update progress
+  const steps = state.currentJob.dialogue;
+  steps.forEach((_, i) => {
+    const el = document.getElementById(`dlg-step-${i}`);
+    if (el) el.className = 'dlg-step done';
+  });
+}
+
+function advanceDialogue() {
+  if (!state.started) return;
+  if (state.awaitingChoice) return;
+  if (!document.getElementById('dialogue-overlay').classList.contains('active')) return;
+
+  if (state.dlgBranch === 'toVideo') {
+    closeDlgOpenVideo();
+    return;
+  }
+
+  const job = state.currentJob;
+  const nextStep = state.dlgStep + 1;
+
+  if (nextStep >= job.dialogue.length) {
+    closeDlgOpenVideo();
+  } else {
+    showDlgStep(nextStep);
+  }
+}
+
+function skipDialogue() {
+  closeDlgOpenVideo();
+}
+
+function closeDlgOpenVideo() {
+  document.getElementById('dialogue-overlay').classList.remove('active');
+  if (state.currentJob) openVideoModal(state.currentJob);
+}
+
+// ============================================================
+// VIDÉO
+// ============================================================
+function openVideoModal(job) {
+  document.getElementById('vm-icon').textContent = job.icon;
+  document.getElementById('vm-title').textContent = job.name;
+  document.getElementById('vm-sub').textContent = `${job.npcName} · ${job.npcRole}`;
+  document.getElementById('ph-title').textContent = job.videoTitle;
+  document.getElementById('ph-dur').textContent = job.videoDuration;
+  document.getElementById('vm-reward-text').textContent = job.reward;
+
+  // Reset placeholder
+  const ph = document.getElementById('video-ph');
+  ph.innerHTML = `
+    <div class="play-ring">▶</div>
+    <div class="ph-title" id="ph-title">${job.videoTitle}</div>
+    <div class="ph-sub">Clique pour lancer la vidéo de présentation du métier</div>
+    <div class="dur-tag">${job.videoDuration}</div>
+  `;
+  ph.onclick = playVideoMock;
+
+  document.getElementById('video-overlay').classList.add('active');
+}
+
+function playVideoMock() {
+  const ph = document.getElementById('video-ph');
+  ph.innerHTML = `
+    <div style="font-size:44px;margin-bottom:8px">📺</div>
+    <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:6px">Vidéo en lecture…</div>
+    <div style="color:var(--muted);font-size:12px;text-align:center;line-height:1.6;max-width:360px">
+      Remplace ce placeholder par un <strong style="color:#fff">iframe YouTube</strong><br>
+      en ajoutant un champ <code style="color:var(--green)">videoUrl</code> dans l'objet du métier.
+    </div>
+    <div style="margin-top:14px;background:rgba(0,168,89,0.1);border:1px solid rgba(0,168,89,0.3);border-radius:8px;padding:8px 14px;color:var(--green);font-size:11px;font-weight:700">
+      💡 Exemple : videoUrl: "https://youtube.com/embed/XXXXX"
+    </div>
+  `;
+  ph.onclick = null;
+}
+
+function closeVideo() {
+  document.getElementById('video-overlay').classList.remove('active');
+}
+
+function validateQuest() {
+  const job = state.currentJob;
+  if (!job) return;
+  closeVideo();
+  state.completed.push(job.id);
+  addXP(job.xp);
+  updateCarnet();
+  showToast(job.icon, `${job.name} débloqué !`, `${job.reward}`);
+
+  // Marquer NPC comme terminé
+  const iconEl = document.getElementById(`npc-icon-${job.id}`);
+  if (iconEl) iconEl.classList.add('done');
+
+  // Prochaine quête ou victoire
+  if (state.completed.length >= JOBS.length) {
+    setTimeout(() => {
+      document.getElementById('vic-xp').textContent = state.xp + ' XP';
+      document.getElementById('victory-screen').style.display = 'flex';
+    }, 1000);
+  }
+}
+
+// ============================================================
+// XP & NIVEAU
+// ============================================================
+function addXP(amount) {
+  state.xp += amount;
+  // Level up check
+  while (state.xp >= state.level * state.xpPerLevel) {
+    state.level++;
+    showToast('⬆️', `Niveau ${state.level} !`, 'Tu montes en compétences !');
+  }
+  updateXPBar();
+}
+
+function updateXPBar() {
+  const prevLevelXP = (state.level - 1) * state.xpPerLevel;
+  const nextLevelXP = state.level * state.xpPerLevel;
+  const pct = Math.min(100, ((state.xp - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100);
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-cur').textContent = state.xp;
+  document.getElementById('xp-next').textContent = nextLevelXP;
+  document.getElementById('level-num').textContent = state.level;
+}
+
+// ============================================================
+// CARNET MÉTIERS
+// ============================================================
+function buildCarnet() {
+  const body = document.getElementById('carnet-body');
+  body.innerHTML = '';
+  JOBS.forEach(job => {
+    const unlocked = state.completed.includes(job.id);
+    const card = document.createElement('div');
+    card.className = 'job-card' + (unlocked ? ' unlocked' : '');
+    card.id = `carnet-${job.id}`;
+
+    if (unlocked) {
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-icon">${job.icon}</div>
+          <div class="card-info">
+            <h3>${job.name}</h3>
+            <p>${job.npcName} · ${job.npcRole.split('·')[1]?.trim() || ''}</p>
+          </div>
+          <div class="xp-earned-badge">+${job.xp} XP</div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">${job.description}</p>
+        <div class="card-tags">${job.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-icon" style="filter:grayscale(1)">❓</div>
+          <div class="card-info">
+            <h3 style="color:var(--muted)">${job.name}</h3>
+            <p>Non découvert</p>
+          </div>
+        </div>
+        <div class="locked-msg">🔒 Trouve ${job.npcName} sur la carte pour débloquer ce métier</div>
+      `;
+    }
+    body.appendChild(card);
+  });
+}
+
+function updateCarnet() {
+  buildCarnet();
+}
+
+function toggleCarnet() {
+  const panel = document.getElementById('side-panel');
+  const btn = document.getElementById('btn-carnet');
+  panel.classList.toggle('open');
+  btn.classList.toggle('active');
+  if (panel.classList.contains('open')) buildCarnet();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer = null;
+function showToast(icon, msg, sub) {
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-sub').textContent = sub;
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ============================================================
+// MANETTE
+// ============================================================
+let lastPadState = {};
+window.addEventListener('gamepadconnected', (e) => {
+  document.getElementById('gp-dot').classList.add('on');
+  document.getElementById('gp-label').textContent = e.gamepad.id.substring(0, 50) + ' · connectée ✓';
+});
+window.addEventListener('gamepaddisconnected', () => {
+  document.getElementById('gp-dot').classList.remove('on');
+  document.getElementById('gp-label').textContent = 'Manette non connectée';
+});
+
+let padMoveTimer = null;
+function pollGamepad() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (const pad of pads) {
+    if (!pad) continue;
+    // Axes joystick gauche
+    const ax = pad.axes[0], ay = pad.axes[1];
+    const thr = 0.35;
+    if (!padMoveTimer) {
+      if (ax < -thr) { movePlayer('left'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      else if (ax > thr) { movePlayer('right'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      if (ay < -thr) { movePlayer('up'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      else if (ay > thr) { movePlayer('down'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      // D-pad
+      if (pad.buttons[14]?.pressed) { movePlayer('left'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      if (pad.buttons[15]?.pressed) { movePlayer('right'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      if (pad.buttons[12]?.pressed) { movePlayer('up'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+      if (pad.buttons[13]?.pressed) { movePlayer('down'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+    }
+    // Bouton ✕ (0) = interagir/avancer dialogue
+    const xBtn = pad.buttons[0];
+    if (xBtn?.pressed && !lastPadState.x) {
+      if (!state.started) startGame();
+      else advanceDialogue();
+    }
+    lastPadState.x = xBtn?.pressed;
+    // Bouton Options (9) = carnet
+    const optBtn = pad.buttons[9];
+    if (optBtn?.pressed && !lastPadState.opt) toggleCarnet();
+    lastPadState.opt = optBtn?.pressed;
+  }
+  requestAnimationFrame(pollGamepad);
+}
+pollGamepad();
+
+// ============================================================
+// CLAVIER
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (!state.started && (e.code === 'Space' || e.code === 'Enter')) { startGame(); return; }
+  if (!state.started) return;
+
+  const km = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+                KeyZ:'up', KeyS:'down', KeyQ:'left', KeyD:'right' };
+  if (km[e.code]) { movePlayer(km[e.code]); e.preventDefault(); return; }
+  if (e.code === 'Space' || e.code === 'Enter') { advanceDialogue(); e.preventDefault(); }
+  if (e.code === 'KeyI' || e.code === 'KeyC') toggleCarnet();
+  if (e.code === 'Escape') {
+    closeVideo();
+    document.getElementById('dialogue-overlay').classList.remove('active');
+  }
+});
+
+// Clic sur la carte = déplacer le joueur
+function onMapClick(e) {
+  if (!state.started) return;
+  state.playerLat = e.latlng.lat;
+  state.playerLng = e.latlng.lng;
+  updatePlayerPos();
+
+  // Vérifier si proche d'un NPC
+  JOBS.forEach(job => {
+    if (state.completed.includes(job.id)) return;
+    const dist = map.distance([state.playerLat, state.playerLng], [job.lat, job.lng]);
+    if (dist < 15000) startDialogue(job);
+  });
+}
+
+// ============================================================
+// DÉMARRAGE / RESTART
+// ============================================================
+function startGame() {
+  state.started = true;
+  document.getElementById('title-screen').style.display = 'none';
+  map.on('click', onMapClick);
+  showToast('🗺️', 'Bienvenue en Ille-et-Vilaine !', 'Clique sur un PNJ ou déplace-toi avec ZQSD');
+}
+
+function restartGame() {
+  state.xp = 0; state.level = 1; state.completed = []; state.currentJob = null;
+  state.dlgStep = 0; state.playerLat = 48.2; state.playerLng = -1.6;
+  state.dlgBranch = null; state.awaitingChoice = false;
+  updateXPBar();
+  updatePlayerPos();
+  // Réinitialiser marqueurs
+  JOBS.forEach(job => {
+    const el = document.getElementById(`npc-icon-${job.id}`);
+    if (el) el.classList.remove('done');
+  });
+  document.getElementById('victory-screen').style.display = 'none';
+  document.getElementById('dialogue-overlay').classList.remove('active');
+  document.getElementById('video-overlay').classList.remove('active');
+  document.getElementById('title-screen').style.display = 'flex';
+  state.started = false;
+  map.off('click', onMapClick);
+  centerMap();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initMap();
+</script>
+</body>
+</html>
