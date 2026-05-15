@@ -1,1525 +1,846 @@
+
+bash
+
+python3 - << 'EOF'
+with open('/home/claude/pp_elio.txt') as f: PP_ELIO = f.read()
+with open('/home/claude/pp_elia.txt') as f: PP_ELIA = f.read()
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Route du Rome – RPG</title>
+<title>La Route du Rome — Jeu</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --blue: #003189;
-  --blue2: #0044bb;
-  --green: #00A859;
-  --green2: #00d16d;
-  --gold: #F5C518;
-  --dark: #060e24;
-  --panel: rgba(4,12,38,0.97);
-  --border: rgba(0,168,89,0.6);
-  --text: #e8f0ff;
-  --muted: #7a8fb8;
-  --xp-color: #00d16d;
+:root{
+  --navy:#1D1E3C; --violet:#69408C; --v2:#8B5BB8;
+  --pink:#EB94C2; --yellow:#FFCC52; --accent:#406BDE;
+  --coral:#EB6366; --sky:#B0BFF0; --plum:#D9C9E5;
+  --muted:#A99BBF; --text:#F0ECF8; --panel:rgba(18,14,36,0.96);
+  --gold:#FFDE8C;
 }
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{font-family:'Nunito',sans-serif;color:var(--text);}
 
-* { margin:0; padding:0; box-sizing:border-box; }
+/* ══ TOPBAR ══ */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:56px;z-index:1000;
+  background:linear-gradient(90deg,#1D1E3C 0%,#2d1e45 100%);
+  border-bottom:2px solid var(--violet);
+  display:flex;align-items:center;justify-content:space-between;padding:0 14px;
+  box-shadow:0 2px 20px rgba(0,0,0,0.6);
+}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.tb-back{background:rgba(105,64,140,0.2);border:1px solid rgba(105,64,140,0.45);color:var(--plum);font-size:11px;font-weight:800;padding:5px 12px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.tb-back:hover{background:rgba(105,64,140,0.45);color:#fff;}
+.tb-badge{background:var(--violet);color:#fff;font-size:9px;font-weight:900;letter-spacing:1.5px;padding:3px 10px;border-radius:4px;text-transform:uppercase;}
+.tb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;}
+.tb-title span{color:var(--yellow);}
 
-body {
-  background: var(--dark);
-  font-family: 'Nunito', sans-serif;
-  color: var(--text);
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+/* Switcher personnage */
+.tb-switcher{display:flex;align-items:center;gap:8px;}
+.sw-label{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.hero-sw{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(105,64,140,0.12);border:1.5px solid rgba(105,64,140,0.25);
+  border-radius:30px;padding:3px 12px 3px 3px;cursor:pointer;transition:all .25s;
+  position:relative;
 }
+.hero-sw:hover{border-color:var(--violet);background:rgba(105,64,140,0.25);}
+.hero-sw.active{border-color:var(--yellow);background:rgba(255,204,82,0.1);}
+.hero-sw.active::after{
+  content:'✓';position:absolute;top:-5px;right:-5px;
+  width:16px;height:16px;background:var(--yellow);color:#1D1E3C;
+  border-radius:50%;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;
+}
+.hero-sw img{width:32px;height:32px;object-fit:cover;border-radius:50%;border:1.5px solid rgba(255,255,255,0.25);}
+.hero-sw-name{font-size:12px;font-weight:800;color:#fff;}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-xp-wrap{display:flex;align-items:center;gap:6px;}
+.tb-xp-bar{width:90px;height:7px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;}
+.tb-xp-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--pink));width:0%;border-radius:4px;transition:width .8s;}
+.tb-xp-lbl{font-size:10px;color:var(--muted);}
+.tb-jobs{font-size:10px;color:var(--muted);white-space:nowrap;}
+.tb-jobs b{color:var(--yellow);}
 
-/* ===== TOPBAR ===== */
-#topbar {
-  background: var(--blue);
-  border-bottom: 3px solid var(--green);
-  padding: 0 18px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-  z-index: 1000;
-}
-.topbar-logo {
-  display: flex; align-items: center; gap: 10px;
-}
-.topbar-logo .ft-badge {
-  background: var(--green);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  padding: 3px 10px;
-  border-radius: 4px;
-  text-transform: uppercase;
-}
-.topbar-logo .game-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 13px;
-  color: #fff;
-  letter-spacing: 1px;
-}
-.topbar-logo .game-title span { color: var(--green); }
+/* ══ MAP ══ */
+#map{position:fixed;top:56px;left:0;right:0;bottom:0;z-index:1;}
 
-/* XP bar */
-#xp-bar-wrap {
-  display: flex; align-items: center; gap: 10px;
+/* Style Zelda BOTW : tuiles en aquarelle/peinture */
+.leaflet-tile-pane{
+  filter:
+    sepia(0.5)
+    saturate(1.8)
+    brightness(0.82)
+    contrast(1.1)
+    hue-rotate(8deg);
 }
-.level-badge {
-  background: var(--gold);
-  color: #1a0e00;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
+/* Grille parchemin */
+#map::before{
+  content:'';position:absolute;inset:0;z-index:450;pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(80,50,15,0.05) 0,rgba(80,50,15,0.05) 1px,transparent 1px,transparent 32px),
+    repeating-linear-gradient(90deg,rgba(80,50,15,0.04) 0,rgba(80,50,15,0.04) 1px,transparent 1px,transparent 32px);
 }
-.xp-track {
-  width: 180px;
-  height: 14px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 7px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.15);
+/* Vignette + bords */
+#map::after{
+  content:'';position:absolute;inset:0;z-index:450;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(10,8,20,0.5) 100%);
+  box-shadow:inset 0 0 60px rgba(10,8,20,0.4);
 }
-.xp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--green), var(--green2));
-  border-radius: 7px;
-  transition: width 0.6s cubic-bezier(.34,1.56,.64,1);
-  box-shadow: 0 0 10px rgba(0,168,89,0.6);
-}
-.xp-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+.leaflet-container{background:#6a8c3a;}
 
-/* Boutons topbar */
-.topbar-btns { display: flex; gap: 8px; }
-.tbtn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all .2s;
-  display: flex; align-items: center; gap: 5px;
+/* ══ NPC MARKERS ══ */
+.npc-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.npc-icon{
+  width:52px;height:52px;border-radius:50%;
+  border:3px solid var(--violet);background:var(--panel);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 0 0 3px rgba(105,64,140,0.2),0 4px 18px rgba(0,0,0,0.7);
+  animation:npcF 2.5s ease-in-out infinite;transition:transform .2s;
 }
-.tbtn:hover { background: rgba(0,168,89,0.2); border-color: var(--green); }
-.tbtn.active { background: rgba(0,168,89,0.25); border-color: var(--green); color: var(--green); }
+.npc-icon:hover{transform:scale(1.18) !important;}
+.npc-icon.done{opacity:.4;filter:grayscale(1);animation:none;}
+.npc-lbl{
+  background:rgba(18,14,36,0.92);border:1px solid rgba(105,64,140,0.5);
+  color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;
+  margin-top:3px;white-space:nowrap;backdrop-filter:blur(4px);
+}
+@keyframes npcF{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
 
-/* ===== MAIN LAYOUT ===== */
-#main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  position: relative;
+/* ══ PLAYER MARKER ══ */
+.player-wrap{display:flex;flex-direction:column;align-items:center;}
+.player-portrait{
+  width:48px;height:48px;object-fit:cover;border-radius:50%;
+  border:3px solid var(--violet);
+  box-shadow:0 0 0 3px rgba(105,64,140,0.3),0 0 24px rgba(105,64,140,0.6);
+  animation:ppPulse 2s ease-in-out infinite;
 }
+@keyframes ppPulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(105,64,140,0.3),0 0 24px rgba(105,64,140,0.6);}
+  50%{box-shadow:0 0 0 6px rgba(105,64,140,0.1),0 0 36px rgba(105,64,140,0.9);}
+}
+.player-lbl{background:var(--navy);border:1px solid var(--violet);color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;margin-top:3px;white-space:nowrap;}
 
-/* ===== MAP ===== */
-#map {
-  flex: 1;
-  z-index: 1;
+/* ══ QUEST HUD ══ */
+#qhud{
+  position:fixed;top:66px;left:12px;z-index:200;
+  background:rgba(18,14,36,0.9);border:1.5px solid rgba(105,64,140,0.5);
+  border-radius:10px;padding:8px 13px;max-width:220px;backdrop-filter:blur(6px);
 }
+#qhud h3{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:3px;}
+#q-title{font-size:12px;font-weight:800;color:#fff;}
+#q-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4;}
 
-/* Leaflet overrides */
-.leaflet-container { background: #1a3a5c; }
-.leaflet-tile-pane { filter: saturate(0.85) brightness(0.75) hue-rotate(10deg); }
+/* ══ DIALOGUE ══ */
+#dlg{
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:var(--panel);border-top:3px solid var(--violet);
+  backdrop-filter:blur(14px);
+  transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+#dlg.open{transform:translateY(0);}
+.dlg-head{
+  background:rgba(22,18,44,0.99);padding:10px 16px;
+  display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(105,64,140,0.3);
+}
+.dlg-portrait{width:46px;height:46px;object-fit:cover;border-radius:50%;border:2px solid var(--violet);flex-shrink:0;}
+.dlg-info{flex:1;}
+.dlg-nname{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--plum);}
+.dlg-nrole{font-size:11px;color:var(--muted);margin-top:1px;}
+.dlg-jtag{background:rgba(105,64,140,0.2);border:1px solid rgba(105,64,140,0.4);color:var(--plum);font-size:11px;font-weight:800;padding:4px 11px;border-radius:20px;white-space:nowrap;}
+.dlg-dots{display:flex;gap:4px;margin-left:8px;}
+.dd{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.12);transition:background .3s;}
+.dd.on{background:var(--violet);}
+.dd.done{background:rgba(105,64,140,0.45);}
+.dlg-x{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;line-height:1;}
+.dlg-x:hover{background:rgba(255,255,255,0.2);color:#fff;}
+.dlg-body{padding:13px 16px;min-height:50px;}
+#dlg-txt{font-size:14px;line-height:1.7;color:var(--text);}
+#dlg-choices{padding:0 16px 12px;display:none;}
+.cbtn{
+  display:flex;align-items:center;gap:9px;width:100%;
+  background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);
+  color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;
+  padding:9px 13px;border-radius:8px;cursor:pointer;margin-bottom:6px;
+  text-align:left;transition:all .2s;
+}
+.cbtn:hover{background:rgba(105,64,140,0.22);border-color:var(--violet);color:#fff;transform:translateX(4px);}
+.cltr{width:22px;height:22px;background:var(--violet);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0;}
+.dlg-foot{border-top:1px solid rgba(105,64,140,0.2);padding:7px 16px;display:flex;justify-content:space-between;align-items:center;}
+.dlg-hint{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;animation:blnk 1.2s ease-in-out infinite;}
+@keyframes blnk{0%,100%{opacity:1;}50%{opacity:.3;}}
+.dkey{background:rgba(105,64,140,0.2);border:1px solid rgba(105,64,140,0.4);color:var(--plum);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
 
-/* Marqueur NPC custom */
-.npc-marker {
-  display: flex; flex-direction: column; align-items: center;
-  cursor: pointer;
+/* ══ MODAL VIDÉO/MÉTIER ══ */
+#voverlay{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
 }
-.npc-icon-wrap {
-  width: 46px; height: 46px;
-  border-radius: 50%;
-  border: 3px solid var(--green);
-  background: var(--panel);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 0 0 3px rgba(0,168,89,0.25), 0 4px 16px rgba(0,0,0,0.5);
-  transition: transform .2s;
-  animation: floatNPC 2.5s ease-in-out infinite;
+#voverlay.open{opacity:1;pointer-events:all;}
+.vmodal{
+  background:var(--panel);border:2px solid var(--violet);border-radius:18px;
+  width:680px;max-width:96vw;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.8);
+  animation:mIn .35s cubic-bezier(.34,1.56,.64,1);
 }
-.npc-icon-wrap:hover { transform: scale(1.15); }
-.npc-label {
-  margin-top: 4px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 10px;
-  white-space: nowrap;
+@keyframes mIn{from{transform:scale(.85) translateY(18px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.vmod-head{
+  background:linear-gradient(135deg,var(--violet),var(--v2));
+  padding:14px 20px;display:flex;align-items:center;gap:12px;position:relative;
 }
-.npc-icon-wrap.done { border-color: var(--gold); filter: grayscale(0.4); }
-.npc-icon-wrap.done::after {
-  content: '✅';
-  position: absolute;
-  font-size: 16px;
-  bottom: -4px; right: -4px;
-}
-.npc-icon-wrap { position: relative; }
+.vmod-icon{font-size:32px;}
+.vmod-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;}
+.vmod-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;letter-spacing:1px;}
+.vmod-x{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.18);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;line-height:1;}
+.vmod-x:hover{background:rgba(255,255,255,0.35);}
+.vmod-body{padding:18px 20px;}
 
-@keyframes floatNPC {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+/* Zone vidéo */
+.vplayer{
+  border-radius:10px;height:200px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:14px;position:relative;overflow:hidden;
+  background:rgba(0,0,0,0.55);border:2px dashed rgba(105,64,140,0.4);
 }
+.vplayer video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;display:none;}
+.vplayer video.active{display:block;}
+.vph{text-align:center;color:var(--muted);padding:0 20px;}
+.vph .pr{width:58px;height:58px;border:3px solid var(--violet);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px;box-shadow:0 0 22px rgba(105,64,140,0.4);}
+.vph strong{color:var(--text);display:block;font-size:14px;margin-bottom:4px;}
+.vph p{font-size:11px;line-height:1.5;}
 
-/* Marqueur joueur */
-.player-marker-wrap {
-  display: flex; flex-direction: column; align-items: center;
+/* Dialogue dans la modale */
+.vdlg-wrap{background:rgba(22,18,44,0.85);border:1px solid rgba(105,64,140,0.3);border-radius:10px;padding:12px 15px;margin-bottom:12px;}
+.vdlg-question{font-size:13px;color:var(--plum);font-weight:800;margin-bottom:10px;}
+.vdlg-reply{font-size:13px;color:var(--text);line-height:1.6;font-style:italic;display:none;margin-top:8px;padding-top:8px;border-top:1px solid rgba(105,64,140,0.25);}
+.vdlg-reply.show{display:block;}
+.vchoices{display:flex;flex-direction:column;gap:5px;}
+.vc{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(105,64,140,0.1);border:1px solid rgba(105,64,140,0.28);
+  color:var(--text);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;
+  padding:8px 12px;border-radius:7px;cursor:pointer;text-align:left;transition:all .2s;
 }
-.player-dot {
-  width: 34px; height: 34px;
-  background: var(--blue);
-  border: 3px solid var(--green);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 0 0 4px rgba(0,168,89,0.3), 0 0 20px rgba(0,168,89,0.4);
-  animation: playerPulse 2s ease-in-out infinite;
-}
-@keyframes playerPulse {
-  0%,100% { box-shadow: 0 0 0 4px rgba(0,168,89,0.3), 0 0 20px rgba(0,168,89,0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(0,168,89,0.15), 0 0 30px rgba(0,168,89,0.6); }
-}
-.player-name {
-  background: var(--blue);
-  border: 1px solid var(--green);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 8px;
-  margin-top: 3px;
-  white-space: nowrap;
-}
+.vc:hover{background:rgba(105,64,140,0.3);border-color:var(--violet);transform:translateX(3px);}
+.vc.picked{background:rgba(105,64,140,0.35);border-color:var(--yellow);}
+.vcl{width:20px;height:20px;background:var(--violet);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0;}
 
-/* Zone de proximité */
-.prox-circle { pointer-events: none; }
+.vreward{display:flex;align-items:center;gap:10px;background:rgba(255,222,140,0.1);border:1px solid rgba(255,222,140,0.3);border-radius:8px;padding:9px 13px;margin-bottom:14px;}
+.vri{font-size:20px;}
+.vrt{font-size:12px;font-weight:800;color:var(--gold);}
+.vrs{font-size:10px;color:rgba(255,222,140,0.6);}
+.vactions{display:flex;gap:10px;justify-content:flex-end;}
+.btn{padding:9px 22px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;}
+.btn-v{background:linear-gradient(135deg,var(--violet),var(--v2));color:#fff;box-shadow:0 4px 14px rgba(105,64,140,0.4);}
+.btn-v:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(105,64,140,0.6);}
+.btn-g{background:rgba(255,255,255,0.07);color:var(--muted);border:1px solid rgba(255,255,255,0.1);}
+.btn-g:hover{background:rgba(255,255,255,0.14);color:#fff;}
 
-/* ===== PANNEAU LATÉRAL (carnet) ===== */
-#side-panel {
-  width: 340px;
-  background: var(--panel);
-  border-left: 2px solid var(--border);
-  display: none;
-  flex-direction: column;
-  z-index: 100;
-  overflow: hidden;
+/* ══ TOAST ══ */
+#toast{
+  position:fixed;top:66px;left:50%;transform:translateX(-50%);
+  background:var(--panel);border:2px solid var(--violet);border-radius:12px;
+  padding:10px 20px;display:flex;align-items:center;gap:10px;
+  z-index:900;opacity:0;transition:opacity .3s,top .3s;pointer-events:none;
+  box-shadow:0 8px 30px rgba(105,64,140,0.35);backdrop-filter:blur(8px);
+  white-space:nowrap;
 }
-#side-panel.open { display: flex; }
-
-.panel-header {
-  background: var(--blue);
-  border-bottom: 2px solid var(--green);
-  padding: 14px 18px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.panel-header h2 {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  color: var(--green);
-  letter-spacing: 1px;
-}
-.panel-close {
-  background: none; border: none; color: var(--muted);
-  font-size: 18px; cursor: pointer; transition: color .2s;
-}
-.panel-close:hover { color: #fff; }
-
-.panel-body { flex:1; overflow-y: auto; padding: 16px; }
-.panel-body::-webkit-scrollbar { width: 5px; }
-.panel-body::-webkit-scrollbar-track { background: transparent; }
-.panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-/* Cards métiers dans le carnet */
-.job-card {
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
-  transition: all .3s;
-  opacity: 0.4;
-}
-.job-card.unlocked {
-  opacity: 1;
-  border-color: var(--border);
-  background: rgba(0,168,89,0.06);
-}
-.job-card .card-top {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-}
-.job-card .card-icon {
-  font-size: 28px;
-  width: 46px; height: 46px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-}
-.job-card .card-info h3 { font-size: 14px; font-weight: 800; color: #fff; }
-.job-card .card-info p { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.job-card .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-.tag {
-  font-size: 10px; font-weight: 700;
-  padding: 3px 9px; border-radius: 20px;
-  background: rgba(0,168,89,0.15);
-  color: var(--green);
-  border: 1px solid rgba(0,168,89,0.3);
-}
-.job-card .locked-msg {
-  text-align: center; color: var(--muted); font-size: 11px;
-  padding: 8px 0;
-}
-.xp-earned-badge {
-  background: var(--gold);
-  color: #1a0e00;
-  font-size: 10px;
-  font-weight: 900;
-  padding: 3px 10px;
-  border-radius: 20px;
-  margin-left: auto;
-}
-
-/* ===== DIALOGUE RPG ===== */
-#dialogue-overlay {
-  display: none;
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  z-index: 500;
-  pointer-events: none;
-}
-#dialogue-overlay.active { display: block; pointer-events: all; }
-
-#dialogue-box {
-  background: var(--panel);
-  border-top: 3px solid var(--green);
-  border-left: 2px solid var(--border);
-  border-right: 2px solid var(--border);
-  margin: 0 auto 0;
-  max-width: 860px;
-  width: 100%;
-  padding: 0;
-  overflow: hidden;
-  box-shadow: 0 -10px 60px rgba(0,0,0,0.7);
-  animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity:0; }
-  to { transform: translateY(0); opacity:1; }
-}
-
-.dlg-header {
-  background: var(--blue);
-  padding: 10px 18px;
-  display: flex; align-items: center; gap: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.dlg-avatar {
-  font-size: 32px;
-  width: 48px; height: 48px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px solid var(--ft-green);
-}
-.dlg-npc-name { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--green); }
-.dlg-npc-role { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.dlg-job-tag {
-  margin-left: auto;
-  background: rgba(0,168,89,0.15);
-  border: 1px solid var(--border);
-  color: var(--green);
-  font-size: 11px; font-weight: 800;
-  padding: 4px 12px; border-radius: 20px;
-}
-
-.dlg-body { padding: 16px 20px; min-height: 80px; }
-
-#dlg-text {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text);
-  min-height: 44px;
-}
-#dlg-text .highlight { color: var(--gold); font-weight: 800; }
-
-/* Barre de progression dialogue */
-.dlg-progress {
-  display: flex; gap: 4px; margin-top: 10px;
-}
-.dlg-step {
-  height: 3px; border-radius: 2px;
-  background: rgba(255,255,255,0.12);
-  flex: 1;
-  transition: background .4s;
-}
-.dlg-step.done { background: var(--green); }
-.dlg-step.current { background: var(--gold); }
-
-/* Choix de réponses */
-#choices-area {
-  padding: 0 20px 16px;
-  display: none;
-}
-#choices-area.visible { display: block; }
-
-.choice-btn {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1.5px solid rgba(255,255,255,0.1);
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 6px;
-  text-align: left;
-  transition: all .2s;
-}
-.choice-btn:hover {
-  background: rgba(0,168,89,0.15);
-  border-color: var(--green);
-  color: #fff;
-  transform: translateX(4px);
-}
-.choice-btn .choice-letter {
-  width: 24px; height: 24px;
-  background: var(--blue2);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 900; color: #fff;
-  flex-shrink: 0;
-}
-
-/* Footer dialogue */
-.dlg-footer {
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 8px 20px;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.dlg-continue {
-  font-size: 11px; color: var(--muted);
-  display: flex; align-items: center; gap: 5px;
-  animation: blink 1.2s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.dlg-key {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; font-size: 10px; font-weight: 700;
-  padding: 2px 8px; border-radius: 4px;
-}
-.dlg-skip-btn {
-  background: none; border: 1px solid rgba(255,255,255,0.1);
-  color: var(--muted); font-size: 11px; font-family: 'Nunito', sans-serif;
-  padding: 4px 12px; border-radius: 6px; cursor: pointer;
-  transition: all .2s;
-}
-.dlg-skip-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-
-/* ===== VIDÉO MÉTIER ===== */
-#video-overlay {
-  display: none;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.88);
-  backdrop-filter: blur(8px);
-  z-index: 600;
-  align-items: center; justify-content: center;
-  flex-direction: column;
-}
-#video-overlay.active { display: flex; }
-
-.video-modal {
-  background: var(--panel);
-  border: 2px solid var(--ft-green);
-  border-radius: 18px;
-  width: 700px; max-width: 95%;
-  overflow: hidden;
-  animation: modalIn .35s cubic-bezier(.34,1.56,.64,1);
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-}
-@keyframes modalIn {
-  from { transform: scale(.85) translateY(20px); opacity:0; }
-  to { transform: scale(1) translateY(0); opacity:1; }
-}
-.vm-header {
-  background: var(--green);
-  padding: 14px 22px;
-  display: flex; align-items: center; gap: 12px;
-}
-.vm-header .vm-icon { font-size: 32px; }
-.vm-header .vm-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; line-height: 1.5; }
-.vm-header .vm-sub { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 3px; font-family: 'Nunito', sans-serif; }
-.vm-body { padding: 22px; }
-.video-ph {
-  background: rgba(0,0,0,0.5);
-  border: 2px dashed rgba(0,168,89,0.35);
-  border-radius: 12px;
-  height: 210px;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 10px;
-  cursor: pointer;
-  transition: all .3s;
-  position: relative;
-  overflow: hidden;
-}
-.video-ph:hover { border-color: var(--green); background: rgba(0,168,89,0.07); }
-.play-ring {
-  width: 64px; height: 64px;
-  border: 3px solid var(--green);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px;
-  transition: transform .3s;
-  box-shadow: 0 0 30px rgba(0,168,89,0.4);
-}
-.video-ph:hover .play-ring { transform: scale(1.1); }
-.video-ph .ph-title { color: #fff; font-size: 14px; font-weight: 800; }
-.video-ph .ph-sub { color: var(--muted); font-size: 12px; text-align: center; line-height: 1.5; }
-.video-ph .dur-tag {
-  position: absolute; top:10px; right:10px;
-  background: rgba(0,0,0,0.6); color:#fff; font-size:10px; padding:3px 8px; border-radius:4px;
-}
-.vm-reward {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(245,197,24,0.1);
-  border: 1px solid rgba(245,197,24,0.3);
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-top: 14px;
-}
-.vm-reward .r-icon { font-size: 22px; }
-.vm-reward .r-text { font-size: 13px; font-weight: 800; color: var(--gold); }
-.vm-reward .r-sub { font-size: 11px; color: rgba(245,197,24,0.6); }
-.vm-actions {
-  display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;
-}
-.btn-ft {
-  padding: 10px 26px; border-radius: 8px; border: none;
-  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
-  cursor: pointer; transition: all .2s;
-}
-.btn-primary { background: var(--green); color: #fff; box-shadow: 0 4px 14px rgba(0,168,89,0.35); }
-.btn-primary:hover { background: var(--green2); transform: translateY(-2px); }
-.btn-ghost { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
-.btn-ghost:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-/* ===== NOTIFICATION TOAST ===== */
-#toast {
-  position: absolute;
-  top: 20px; left: 50%; transform: translateX(-50%);
-  background: var(--panel);
-  border: 2px solid var(--ft-green);
-  border-radius: 12px;
-  padding: 12px 22px;
-  display: flex; align-items: center; gap: 12px;
-  z-index: 800;
-  opacity: 0;
-  transition: opacity .3s, top .3s;
-  pointer-events: none;
-  box-shadow: 0 8px 40px rgba(0,168,89,0.3);
-}
-#toast.show { opacity: 1; top: 24px; }
-#toast .toast-icon { font-size: 24px; }
-#toast .toast-msg { font-size: 13px; font-weight: 800; color: #fff; }
-#toast .toast-sub { font-size: 11px; color: var(--muted); }
-
-/* ===== TITRE D'ÉCRAN ===== */
-#title-screen {
-  position: absolute;
-  top:0;left:0;right:0;bottom:0;
-  background: radial-gradient(ellipse at 50% 30%, #001a5e 0%, #000d22 70%);
-  z-index: 900;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 0;
-}
-.ts-ft { background: var(--green); color:#fff; font-size:11px; font-weight:900; letter-spacing:2px; padding:5px 16px; border-radius:4px; text-transform:uppercase; margin-bottom:22px; }
-.ts-main {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 34px;
-  color: #fff;
-  text-align: center;
-  line-height: 1.4;
-  text-shadow: 0 0 40px rgba(0,168,89,0.5);
-  margin-bottom: 8px;
-}
-.ts-main span { color: var(--green); }
-.ts-subtitle { font-size: 13px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; }
-.ts-desc {
-  max-width: 500px; text-align: center;
-  font-size: 14px; color: #8899bb; line-height: 1.8;
-  margin-bottom: 40px;
-}
-.ts-desc strong { color: #fff; }
-.ts-jobs { display: flex; gap: 12px; margin-bottom: 50px; flex-wrap: wrap; justify-content: center; }
-.ts-job {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(0,168,89,0.25);
-  border-radius: 10px;
-  padding: 10px 14px;
-  text-align: center;
-  transition: all .3s;
-}
-.ts-job:hover { background: rgba(0,168,89,0.1); border-color: var(--green); transform: translateY(-3px); }
-.ts-job .tj-icon { font-size: 24px; }
-.ts-job .tj-name { font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 700; }
-.ts-start {
-  background: var(--green);
-  color: #fff;
-  border: none;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 13px;
-  padding: 16px 40px;
-  border-radius: 10px;
-  cursor: pointer;
-  letter-spacing: 1px;
-  box-shadow: 0 0 40px rgba(0,168,89,0.5);
-  animation: glowPulse 2s ease-in-out infinite;
-  transition: all .3s;
-}
-.ts-start:hover { background: var(--green2); transform: scale(1.04); }
-@keyframes glowPulse {
-  0%,100% { box-shadow: 0 0 30px rgba(0,168,89,0.5); }
-  50% { box-shadow: 0 0 60px rgba(0,168,89,0.8); }
-}
-.ts-hint { color: #334; font-size: 11px; margin-top: 16px; letter-spacing: 1px; }
-
-/* ===== VICTOIRE ===== */
-#victory-screen {
-  display: none;
-  position: absolute;
-  top:0;left:0;right:0;bottom:0;
-  background: radial-gradient(ellipse at 50% 40%, #001a5e 0%, #000d22 100%);
-  z-index: 900;
-  flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 16px;
-  text-align: center;
-  padding: 40px;
-}
-#victory-screen h1 {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 28px; color: var(--gold);
-  text-shadow: 0 0 40px rgba(245,197,24,0.5);
-  line-height: 1.4;
-}
-#victory-screen .vic-sub { color: var(--muted); font-size: 14px; max-width: 500px; line-height: 1.8; }
-.vic-jobs { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.vic-job {
-  background: rgba(0,168,89,0.12);
-  border: 2px solid var(--ft-green);
-  border-radius: 12px;
-  padding: 14px 18px;
-  font-size: 28px;
-  text-align: center;
-}
-.vic-job p { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 800; }
-.vic-score { font-size: 16px; color: var(--muted); }
-.vic-score strong { color: var(--gold); font-size: 22px; }
-
-/* ===== CONTRÔLES CARTE ===== */
-#map-controls {
-  position: absolute;
-  bottom: 200px; right: 14px;
-  z-index: 400;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.map-ctrl-btn {
-  width: 40px; height: 40px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .2s;
-}
-.map-ctrl-btn:hover { background: rgba(0,168,89,0.2); border-color: var(--green); }
-
-/* Bouton mouvement clavier sur la carte */
-#move-hint {
-  position: absolute;
-  bottom: 180px; left: 50%; transform: translateX(-50%);
-  z-index: 400;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 6px 16px;
-  font-size: 11px;
-  color: var(--muted);
-  display: flex; align-items: center; gap: 8px;
-  pointer-events: none;
-}
-#move-hint .key { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color:#fff; font-size:10px; font-weight:700; padding:1px 7px; border-radius:4px; }
-
-/* Gamepad indicator */
-#gamepad-bar {
-  position: absolute;
-  bottom: 0; left:0; right:0;
-  background: rgba(4,12,38,0.9);
-  border-top: 1px solid var(--border);
-  padding: 5px 16px;
-  display: flex; align-items:center; gap:8px;
-  font-size: 10px; color: var(--muted);
-  z-index: 400;
-}
-.gp-dot { width:7px; height:7px; border-radius:50%; background: #334; transition: background .3s; }
-.gp-dot.on { background: var(--green); box-shadow: 0 0 6px rgba(0,168,89,0.6); }
+#toast.show{opacity:1;top:70px;}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div id="topbar">
-  <div class="topbar-logo">
-    <div class="ft-badge">France Travail</div>
-    <div class="game-title">LA ROUTE <span>DU ROME</span></div>
+  <div class="tb-left">
+    <a class="tb-back" href="index.html">← Accueil</a>
+    <div class="tb-badge">FT · 35</div>
+    <div class="tb-title">LA ROUTE <span>DU ROME</span></div>
   </div>
-  <div id="xp-bar-wrap">
-    <div class="level-badge">NV.<span id="level-num">1</span></div>
-    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
-    <div class="xp-label"><span id="xp-cur">0</span> / <span id="xp-next">200</span> XP</div>
+
+  <!-- Switcher personnage -->
+  <div class="tb-switcher">
+    <span class="sw-label">Perso :</span>
+    <div class="hero-sw active" id="sw-elio" onclick="switchHero('elio')">
+      <img id="sw-img-elio" src="img/ElioPP.png" alt="Élio">
+      <span class="hero-sw-name">Élio</span>
+    </div>
+    <div class="hero-sw" id="sw-elia" onclick="switchHero('elia')">
+      <img id="sw-img-elia" src="img/EliaPP.png" alt="Élia">
+      <span class="hero-sw-name">Élia</span>
+    </div>
   </div>
-  <div class="topbar-btns">
-    <button class="tbtn" id="btn-carnet" onclick="toggleCarnet()">📖 Carnet</button>
-    <button class="tbtn" id="btn-map" onclick="centerMap()">🗺️ Centrer</button>
+
+  <div class="tb-right">
+    <div class="tb-xp-wrap">
+      <span class="tb-xp-lbl">XP</span>
+      <div class="tb-xp-bar"><div class="tb-xp-fill" id="xpf"></div></div>
+      <span class="tb-xp-lbl"><span id="xpv">0</span>/750</span>
+    </div>
+    <div class="tb-jobs">Métiers : <b id="jv">0</b>/5</div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div id="main">
-  <div id="map"></div>
+<!-- MAP -->
+<div id="map"></div>
 
-  <!-- Panneau carnet -->
-  <div id="side-panel">
-    <div class="panel-header">
-      <h2>📖 Carnet Métiers</h2>
-      <button class="panel-close" onclick="toggleCarnet()">✕</button>
+<!-- QUEST HUD -->
+<div id="qhud">
+  <h3>📋 Quête active</h3>
+  <div id="q-title">Explore la région !</div>
+  <div id="q-desc">Clique sur un personnage pour lui parler.</div>
+</div>
+
+<!-- DIALOGUE NPC -->
+<div id="dlg">
+  <div class="dlg-head">
+    <img class="dlg-portrait" id="dp" src="img/ElioPP.png">
+    <div class="dlg-info">
+      <div class="dlg-nname" id="dnn">—</div>
+      <div class="dlg-nrole" id="dnr">—</div>
     </div>
-    <div class="panel-body" id="carnet-body"></div>
+    <div class="dlg-jtag" id="djt">🗺️</div>
+    <div class="dlg-dots" id="dds"></div>
+    <button class="dlg-x" onclick="closeDlg()">✕</button>
   </div>
-
-  <!-- Contrôles carte -->
-  <div id="map-controls">
-    <button class="map-ctrl-btn" onclick="movePlayer('up')">▲</button>
-    <button class="map-ctrl-btn" onclick="movePlayer('down')">▼</button>
-    <button class="map-ctrl-btn" onclick="movePlayer('left')">◀</button>
-    <button class="map-ctrl-btn" onclick="movePlayer('right')">▶</button>
+  <div class="dlg-body"><div id="dlg-txt"></div></div>
+  <div id="dlg-choices"></div>
+  <div class="dlg-foot">
+    <div class="dlg-hint"><span class="dkey">Espace</span>&nbsp;·&nbsp;<span class="dkey">Clic</span>&nbsp;pour continuer</div>
   </div>
+</div>
 
-  <div id="move-hint">
-    <span class="key">Z</span><span class="key">Q</span><span class="key">S</span><span class="key">D</span>
-    ou flèches pour se déplacer ·
-    <span class="key">Espace</span> pour interagir
-  </div>
-
-  <!-- Overlay dialogue -->
-  <div id="dialogue-overlay">
-    <div id="dialogue-box">
-      <div class="dlg-header">
-        <div class="dlg-avatar" id="dlg-avatar">👨‍🌾</div>
+<!-- MODAL VIDÉO MÉTIER -->
+<div id="voverlay">
+  <div class="vmodal">
+    <div class="vmod-head">
+      <div class="vmod-icon" id="vi">⚓</div>
+      <div>
+        <div class="vmod-title" id="vt">Métier</div>
+        <div class="vmod-sub" id="vs">Découverte · Ille-et-Vilaine</div>
+      </div>
+      <button class="vmod-x" onclick="closeVM()">✕</button>
+    </div>
+    <div class="vmod-body">
+      <!-- Zone vidéo -->
+      <div class="vplayer" id="vpl">
+        <video id="vvid" controls></video>
+        <div class="vph" id="vph">
+          <div class="pr">▶</div>
+          <strong id="vvt">Vidéo du métier</strong>
+          <p>Vidéo disponible prochainement</p>
+        </div>
+      </div>
+      <!-- Dialogue avec choix -->
+      <div class="vdlg-wrap">
+        <div class="vdlg-question" id="vdq">Qu'est-ce qui t'intéresse dans ce métier ?</div>
+        <div class="vchoices" id="vcs"></div>
+        <div class="vdlg-reply" id="vdr"></div>
+      </div>
+      <!-- Récompense -->
+      <div class="vreward">
+        <div class="vri">🏆</div>
         <div>
-          <div class="dlg-npc-name" id="dlg-npc-name">Jean-Yves</div>
-          <div class="dlg-npc-role" id="dlg-npc-role">Agriculteur · Romebret</div>
+          <div class="vrt" id="vrt">+150 XP</div>
+          <div class="vrs">Valide la quête pour gagner ta récompense</div>
         </div>
-        <div class="dlg-job-tag" id="dlg-job-tag">🌾 Agriculture</div>
       </div>
-      <div class="dlg-body">
-        <div id="dlg-text"></div>
-        <div class="dlg-progress" id="dlg-progress"></div>
-      </div>
-      <div id="choices-area"><!-- rempli dynamiquement --></div>
-      <div class="dlg-footer">
-        <div class="dlg-continue" id="dlg-continue">
-          <span class="dlg-key">Espace</span> ou <span class="dlg-key">✕</span> pour continuer
-        </div>
-        <button class="dlg-skip-btn" onclick="skipDialogue()">Passer →</button>
+      <div class="vactions">
+        <button class="btn btn-g" onclick="closeVM()">Fermer</button>
+        <button class="btn btn-v" id="v-validate-btn" onclick="validateQuest()">✅ Quête accomplie !</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Overlay vidéo -->
-  <div id="video-overlay">
-    <div class="video-modal">
-      <div class="vm-header">
-        <div class="vm-icon" id="vm-icon">🌾</div>
-        <div>
-          <div class="vm-title" id="vm-title">Agriculture</div>
-          <div class="vm-sub" id="vm-sub">Découverte métier · Ille-et-Vilaine</div>
-        </div>
-      </div>
-      <div class="vm-body">
-        <div class="video-ph" id="video-ph" onclick="playVideoMock()">
-          <div class="play-ring">▶</div>
-          <div class="ph-title" id="ph-title">Découvrir le métier</div>
-          <div class="ph-sub">Cliquez pour lancer la vidéo de présentation</div>
-          <div class="dur-tag" id="ph-dur">~4 min</div>
-        </div>
-        <div class="vm-reward">
-          <div class="r-icon">🏆</div>
-          <div>
-            <div class="r-text" id="vm-reward-text">+150 XP · Badge débloqué</div>
-            <div class="r-sub">Valide la quête pour gagner ta récompense</div>
-          </div>
-        </div>
-        <div class="vm-actions">
-          <button class="btn-ft btn-ghost" onclick="closeVideo()">Fermer</button>
-          <button class="btn-ft btn-primary" onclick="validateQuest()">✅ Quête accomplie !</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast">
-    <div class="toast-icon" id="toast-icon">🎉</div>
-    <div>
-      <div class="toast-msg" id="toast-msg">Métier débloqué !</div>
-      <div class="toast-sub" id="toast-sub">+150 XP gagnés</div>
-    </div>
-  </div>
-
-  <!-- Barre gamepad -->
-  <div id="gamepad-bar">
-    <div class="gp-dot" id="gp-dot"></div>
-    <span id="gp-label">Manette non connectée · Branche une DualShock/DualSense USB ou Bluetooth</span>
-  </div>
-
-  <!-- Écran titre -->
-  <div id="title-screen">
-    <div class="ts-ft">France Travail · Ille-et-Vilaine</div>
-    <div class="ts-main">LA ROUTE<br><span>DU ROME</span></div>
-    <div class="ts-subtitle">Découvre les métiers du 35</div>
-    <div class="ts-desc">
-      Explore une <strong>vraie carte d'Ille-et-Vilaine</strong>.<br>
-      Rencontre 5 habitants, vis leurs dialogues, découvre leurs métiers<br>
-      et construis ton avenir avec France Travail !
-    </div>
-    <div class="ts-jobs">
-      <div class="ts-job"><div class="tj-icon">🌾</div><div class="tj-name">Agriculture</div></div>
-      <div class="ts-job"><div class="tj-icon">⚓</div><div class="tj-name">Maritime</div></div>
-      <div class="ts-job"><div class="tj-icon">⚙️</div><div class="tj-name">Métallurgie</div></div>
-      <div class="ts-job"><div class="tj-icon">🍽️</div><div class="tj-name">Restauration</div></div>
-      <div class="ts-job"><div class="tj-icon">🤝</div><div class="tj-name">Aide personne</div></div>
-    </div>
-    <button class="ts-start" onclick="startGame()">▶ COMMENCER</button>
-    <div class="ts-hint">ESPACE · ENTRÉE · BOUTON ✕ POUR DÉMARRER</div>
-  </div>
-
-  <!-- Écran victoire -->
-  <div id="victory-screen">
-    <div style="font-size:56px">🏆</div>
-    <h1>FÉLICITATIONS !</h1>
-    <p class="vic-sub">Tu as découvert les <strong style="color:#fff">5 métiers</strong> d'Ille-et-Vilaine et complété toutes les quêtes !<br>France Travail t'accompagne dans ta recherche d'emploi et de formation.</p>
-    <div class="vic-jobs">
-      <div class="vic-job">🌾<p>Agriculture</p></div>
-      <div class="vic-job">⚓<p>Maritime</p></div>
-      <div class="vic-job">⚙️<p>Métallurgie</p></div>
-      <div class="vic-job">🍽️<p>Restauration</p></div>
-      <div class="vic-job">🤝<p>Aide personne</p></div>
-    </div>
-    <div class="vic-score">Score final : <strong id="vic-xp">750 XP</strong></div>
-    <button class="ts-start" onclick="restartGame()" style="margin-top:10px;font-size:11px">🔄 REJOUER</button>
-  </div>
+<!-- TOAST -->
+<div id="toast">
+  <span id="ti" style="font-size:22px;">🎉</span>
+  <div><div id="tm" style="font-size:13px;font-weight:800;color:#fff;"></div><div id="ts" style="font-size:10px;color:var(--muted);"></div></div>
 </div>
 
 <script>
-// ============================================================
-// DONNÉES MÉTIERS
-// ============================================================
-const JOBS = [
+// ══ PORTRAITS EMBARQUÉS (fallback si img/ non disponible) ══
+var PP = {
+  elio: 'ELIO_URI',
+  elia: 'ELIA_URI'
+};
+
+// Charger les portraits : préférer img/ si dispo, sinon fallback base64
+function getPortrait(hero) {
+  // Les images du switcher chargent depuis img/ — on récupère leur src réel
+  var el = document.getElementById('sw-img-' + hero);
+  if (el && el.complete && el.naturalWidth > 0) return el.src;
+  return PP[hero];
+}
+
+// ══ DONNÉES MÉTIERS ══
+var JOBS = [
   {
-    id: 'agriculture',
-    name: 'Agriculture',
-    icon: '🌾',
-    npcName: 'Jean-Yves',
-    npcRole: 'Agriculteur · Saint-Aubin-du-Cormier',
-    lat: 48.605, lng: -1.750,
-    tags: ['Élevage laitier', 'Maraîchage', 'Apprentissage dispo', 'CAP/Bac Pro'],
-    description: "L'Ille-et-Vilaine est le 1er département breton pour l'élevage. Agriculteur, maraîcher, technicien agricole... des formations existent pour tous les niveaux.",
-    videoTitle: 'Agriculteur·trice en Ille-et-Vilaine',
-    videoDuration: '~4 min',
-    reward: '+150 XP · Badge 🌾 Agriculteur',
-    xp: 150,
-    dialogue: [
-      { text: "Bonjour, étranger ! Je suis <span class='highlight'>Jean-Yves</span>, agriculteur à Saint-Aubin depuis 22 ans. On élève des vaches laitières et on cultive des légumes.", choices: null },
-      { text: "L'Ille-et-Vilaine est le <span class='highlight'>1er département breton</span> pour l'élevage laitier. C'est un secteur qui recrute, surtout pour des profils en apprentissage !", choices: null },
-      { text: "Qu'est-ce qui t'intéresse dans l'agriculture ?", choices: [
-        { text: "Les animaux et l'élevage", next: 3 },
-        { text: "Les cultures et le maraîchage", next: 4 },
-        { text: "Je veux juste en savoir plus", next: 5 }
-      ]},
-      { text: "Super choix ! L'élevage laitier c'est passionnant. Le <span class='highlight'>BPREA (Brevet Professionnel)</span> en alternance te forme en 2 ans. France Travail peut financer la formation !", choices: null, toVideo: true },
-      { text: "Le maraîchage est en plein boom ! On cherche des <span class='highlight'>maraîchers bio</span> partout. Le CAP Agricole ou le Bac Pro CGEA sont des portes d'entrée idéales.", choices: null, toVideo: true },
-      { text: "Je t'ai préparé une vidéo qui présente tous les métiers de l'agriculture en Bretagne. Tu vas voir, c'est riche en possibilités !", choices: null, toVideo: true }
+    id:'maritime', name:'Maritime', icon:'⚓', color:'#406BDE',
+    npcName:'Morgane', npcRole:'Officière de pêche · Saint-Malo',
+    lat:48.6490, lng:-2.0250, xp:150,
+    videoFile:'Morgane1.mp4',
+    videoTitle:'Les métiers de la mer en Bretagne',
+    questTitle:"L'appel de la mer",
+    questDesc:'Clique sur Morgane au port de Saint-Malo.',
+    dialogue:[
+      "Salut ! Moi c'est Morgane, officière de pêche à Saint-Malo. La mer, c'est ma vie depuis toujours !",
+      "Le secteur maritime breton, c'est des milliers d'emplois : marins-pêcheurs, mécaniciens navires, ostréiculteurs, techniciens portuaires..."
+    ],
+    choices:[
+      {text:"La pêche en haute mer, c'est quoi ?", reply:"La pêche hauturière, c'est intense mais passionnant ! L'ENSM de Saint-Malo forme les officiers en 2 à 4 ans. France Travail peut financer la formation !"},
+      {text:"L'aquaculture / les huîtres ?", reply:"L'ostréiculture en baie du Mont-Saint-Michel, c'est une tradition séculaire ! Des formations courtes existent via France Travail, et beaucoup de postes disponibles localement."},
+      {text:"Travailler à terre, au port ?", reply:"Le port de Saint-Malo recrute des logisticiens, manutentionnaires et techniciens toute l'année. Pas besoin d'aller sur l'eau pour travailler dans le maritime !"}
     ]
   },
   {
-    id: 'maritime',
-    name: 'Maritime',
-    icon: '⚓',
-    npcName: 'Morgane',
-    npcRole: 'Officière de pêche · Saint-Malo',
-    lat: 48.649, lng: -2.025,
-    tags: ['Pêche hauturière', 'Ostréiculture', 'ENSM Saint-Malo', 'CAP Maritime'],
-    description: "Saint-Malo et le littoral breton offrent des métiers uniques : marin-pêcheur, officier de pêche, ostréiculteur, technicien portuaire...",
-    videoTitle: 'Les métiers de la mer en Bretagne',
-    videoDuration: '~5 min',
-    reward: '+150 XP · Badge ⚓ Marin',
-    xp: 150,
-    dialogue: [
-      { text: "Salut ! Moi c'est <span class='highlight'>Morgane</span>, officière de pêche à Saint-Malo. La mer, c'est ma vie depuis que je suis gamine !", choices: null },
-      { text: "Le secteur maritime breton, c'est <span class='highlight'>des milliers d'emplois</span> : marins-pêcheurs, mécaniciens navires, ostréiculteurs, techniciens portuaires...", choices: null },
-      { text: "La mer t'attire ? Qu'est-ce qui te parle le plus ?", choices: [
-        { text: "La pêche en haute mer", next: 3 },
-        { text: "L'aquaculture / huîtres", next: 4 },
-        { text: "Le travail à terre (port, logistique)", next: 5 }
-      ]},
-      { text: "La pêche hauturière, c'est intense mais passionnant ! L'<span class='highlight'>ENSM de Saint-Malo</span> forme les officiers. Le CAP Maritime ouvre aussi des portes rapidement.", choices: null, toVideo: true },
-      { text: "L'ostréiculture en Ille-et-Vilaine, c'est une tradition ! La baie du <span class='highlight'>Mont-Saint-Michel</span> est réputée mondialement. Des formations courtes existent via France Travail.", choices: null, toVideo: true },
-      { text: "Le port de Saint-Malo recrute des <span class='highlight'>logisticiens, manutentionnaires et techniciens</span> toute l'année. Pas besoin d'aller sur l'eau pour travailler dans le maritime !", choices: null, toVideo: true }
+    id:'agriculture', name:'Agriculture', icon:'🌾', color:'#8B5BB8',
+    npcName:'Jean-Yves', npcRole:'Agriculteur · Dol-de-Bretagne',
+    lat:48.5540, lng:-1.7500, xp:150,
+    videoFile:'',
+    videoTitle:"Agriculteur·trice en Ille-et-Vilaine",
+    questTitle:"Les champs de Jean-Yves",
+    questDesc:'Clique sur Jean-Yves à Dol-de-Bretagne.',
+    dialogue:[
+      "Bonjour ! Agriculteur à Dol-de-Bretagne depuis 22 ans. Élevage laitier et cultures maraîchères.",
+      "L'Ille-et-Vilaine est le 1er département breton pour l'élevage laitier. Un secteur qui recrute en permanence !"
+    ],
+    choices:[
+      {text:"Comment devenir agriculteur ?", reply:"Le BPREA en alternance te forme en 2 ans. France Travail peut financer la formation. C'est une voie royale pour entrer dans le métier !"},
+      {text:"Le maraîchage bio ?", reply:"Le CAP Agricole ou le Bac Pro CGEA sont de bonnes portes d'entrée. Le bio est en plein boom dans le 35, et les débouchés sont nombreux !"},
+      {text:"Il y a des postes locaux ?", reply:"Oui ! Les exploitations du 35 cherchent des bras qualifiés toute l'année. Contacte France Travail pour consulter les offres en cours dans ta zone."}
     ]
   },
   {
-    id: 'metallurgie',
-    name: 'Métallurgie',
-    icon: '⚙️',
-    npcName: 'Patrick',
-    npcRole: 'Chef d\'atelier · Vitré',
-    lat: 48.455, lng: -2.049,
-    tags: ['Soudure / Chaudronnerie', 'CNC / Usinage', 'Alternance', 'Industrie 4.0'],
-    description: "L'industrie métallurgique en Ille-et-Vilaine recrute massivement : soudeurs, chaudronniers, techniciens CNC, maintenanciers...",
-    videoTitle: 'Industrie & Métallurgie dans le 35',
-    videoDuration: '~3 min',
-    reward: '+150 XP · Badge ⚙️ Technicien',
-    xp: 150,
-    dialogue: [
-      { text: "Bonjour ! Je suis <span class='highlight'>Patrick</span>, chef d'atelier chez un équipementier auto à Vitré. On fait de la chaudronnerie industrielle de précision.", choices: null },
-      { text: "La métallurgie, c'est <span class='highlight'>l'épine dorsale</span> de l'industrie bretonne. Et en ce moment, on manque cruellement de techniciens qualifiés !", choices: null },
-      { text: "Un poste t'intéresse ?", choices: [
-        { text: "Soudeur / Chaudronnier", next: 3 },
-        { text: "Technicien CNC / Usinage", next: 4 },
-        { text: "Maintenance industrielle", next: 5 }
-      ]},
-      { text: "Le soudeur est <span class='highlight'>le métier le plus recruté</span> de notre secteur ! Le CAP Soudure ou le Bac Pro TCI se fait en 2-3 ans, souvent en alternance payée.", choices: null, toVideo: true },
-      { text: "L'usinage CNC, c'est de la <span class='highlight'>haute technologie</span>. Les Bac Pro et BTS CPRP forment à la programmation de machines 5 axes. Les salaires sont très attractifs.", choices: null, toVideo: true },
-      { text: "La maintenance, c'est l'assurance de ne jamais chômer ! Le <span class='highlight'>Bac Pro MEI</span> ou le BTS Maintenance te donne accès à tous les secteurs industriels.", choices: null, toVideo: true }
+    id:'metallurgie', name:'Métallurgie', icon:'⚙️', color:'#EB6366',
+    npcName:'Patrick', npcRole:"Chef d'atelier · Dinan",
+    lat:48.4550, lng:-2.0490, xp:150,
+    videoFile:'',
+    videoTitle:'Industrie & Métallurgie dans le 35',
+    questTitle:"L'atelier de Patrick",
+    questDesc:"Clique sur Patrick à Dinan.",
+    dialogue:[
+      "Bonjour ! Chef d'atelier chez un équipementier à Dinan. Chaudronnerie industrielle de précision.",
+      "La métallurgie bretonne manque cruellement de techniciens. C'est une vraie opportunité de carrière !"
+    ],
+    choices:[
+      {text:"Soudeur / Chaudronnier ?", reply:"Le CAP Soudure ou le Bac Pro TCI se prépare en 2-3 ans, souvent en alternance payée. C'est le métier le plus recruté du secteur !"},
+      {text:"Technicien CNC ?", reply:"L'usinage CNC, c'est de la haute technologie. Les BTS CPRP forment à la programmation 5 axes. Salaires très attractifs et évolution rapide !"},
+      {text:"La maintenance industrielle ?", reply:"La maintenance, c'est l'assurance de ne jamais chômer ! Le Bac Pro MEI ou le BTS Maintenance ouvre les portes de tous les secteurs industriels."}
     ]
   },
   {
-    id: 'restauration',
-    name: 'Restauration',
-    icon: '🍽️',
-    npcName: 'Sophie',
-    npcRole: 'Cheffe cuisinière · Rennes',
-    lat: 48.672, lng: -1.847,
-    tags: ['Cuisine bretonne', 'CAP Cuisine', 'Hôtellerie', 'Pâtisserie'],
-    description: "La gastronomie bretonne rayonne mondialement. Cuisinier, pâtissier, serveur, responsable de salle... le secteur HCR recrute toute l'année.",
-    videoTitle: 'Restauration & Hôtellerie en Bretagne',
-    videoDuration: '~4 min',
-    reward: '+150 XP · Badge 🍽️ Cuisinier',
-    xp: 150,
-    dialogue: [
-      { text: "Bonjour ! Je suis <span class='highlight'>Sophie</span>, cheffe de cuisine à Rennes. Ma brigade régale chaque jour avec la gastronomie bretonne — crêpes, galettes, fruits de mer !", choices: null },
-      { text: "Le secteur de la restauration est <span class='highlight'>en tension permanente</span>. On cherche des cuisiniers, serveurs, pâtissiers à tous les niveaux. Même débutant, on peut démarrer vite !", choices: null },
-      { text: "Quel aspect de la restauration t'attire ?", choices: [
-        { text: "La cuisine / la création", next: 3 },
-        { text: "La salle / le contact client", next: 4 },
-        { text: "La gestion / management", next: 5 }
-      ]},
-      { text: "La cuisine, c'est un art ! Le <span class='highlight'>CAP Cuisine</span> se prépare en 1 an pour les adultes avec France Travail. Après, le ciel est la limite : étoiles Michelin, émissions TV...", choices: null, toVideo: true },
-      { text: "Le service en salle, c'est souvent <span class='highlight'>le premier contact avec le monde du travail</span>. Le Titre Pro Serveur ou le Bac Pro SAPAT se fait rapidement, et les extras payent bien !", choices: null, toVideo: true },
-      { text: "La gestion d'un restaurant, c'est du management et de la compta ! Le <span class='highlight'>BTS MHR</span> (Management Hôtellerie Restauration) ou le Bachelor ouvre les portes du management.", choices: null, toVideo: true }
+    id:'restauration', name:'Restauration', icon:'🍽️', color:'#FFCC52',
+    npcName:'Sophie', npcRole:'Cheffe cuisinière · Cancale',
+    lat:48.6720, lng:-1.8470, xp:150,
+    videoFile:'',
+    videoTitle:'Restauration & Hôtellerie en Bretagne',
+    questTitle:"La crêperie de Sophie",
+    questDesc:'Clique sur Sophie à Cancale.',
+    dialogue:[
+      "Bonjour ! Cheffe de cuisine à Cancale — la capitale de l'huître ! Galettes, crêpes, fruits de mer...",
+      "Le secteur HCR recrute en permanence. Même débutant sans diplôme, on peut démarrer vite !"
+    ],
+    choices:[
+      {text:"Devenir cuisinier ?", reply:"Le CAP Cuisine se prépare en 1 an pour les adultes avec France Travail. La gastronomie bretonne est mondialement reconnue, les opportunités sont réelles !"},
+      {text:"La salle et le service ?", reply:"Le Titre Pro Serveur ou le Bac Pro SAPAT se fait rapidement. Les extras payent bien et les débouchés sont partout dans la région."},
+      {text:"Gérer un restaurant ?", reply:"Le BTS MHR (Management Hôtellerie Restauration) ouvre les portes du management. Accessible en alternance et très valorisé !"}
     ]
   },
   {
-    id: 'aide_personne',
-    name: 'Aide à la personne',
-    icon: '🤝',
-    npcName: 'Marie-Claire',
-    npcRole: 'Auxiliaire de vie · Fougères',
-    lat: 48.634, lng: -2.067,
-    tags: ['Aide à domicile', 'EHPAD', 'DEAES / ADVF', 'Sens & utilité'],
-    description: "Les métiers du lien et du care sont essentiels et très recruteurs. Aide à domicile, auxiliaire de vie, animateur en EHPAD... des formations rapides et financées.",
-    videoTitle: 'Aide à la personne en Ille-et-Vilaine',
-    videoDuration: '~3 min',
-    reward: '+150 XP · Badge 🤝 Aidant',
-    xp: 150,
-    dialogue: [
-      { text: "Bonjour ! Je suis <span class='highlight'>Marie-Claire</span>, auxiliaire de vie à Fougères depuis 8 ans. J'accompagne des personnes âgées et des adultes en situation de handicap.", choices: null },
-      { text: "Ces métiers du lien sont <span class='highlight'>parmi les plus recruteurs du 35</span>. Des milliers de postes à pourvoir chaque année, et une vraie reconnaissance qui grandit !", choices: null },
-      { text: "Qu'est-ce qui te touche dans ce secteur ?", choices: [
-        { text: "Accompagner les personnes âgées", next: 3 },
-        { text: "Soutenir les personnes handicapées", next: 4 },
-        { text: "Travailler en structure (EHPAD, IME...)", next: 5 }
-      ]},
-      { text: "L'accompagnement des seniors, c'est un métier de cœur ! Le <span class='highlight'>DEAVS ou le Titre ADVF</span> se prépare en quelques mois, financé par France Travail. Les emplois sont stables et locaux.", choices: null, toVideo: true },
-      { text: "Accompagner les personnes handicapées demande de l'empathie et des compétences. Le <span class='highlight'>DEAES (Diplôme d'État)</span> est la voie royale. Des contrats en alternance sont disponibles partout dans le 35.", choices: null, toVideo: true },
-      { text: "Travailler en EHPAD ou en IME, c'est être entouré d'une vraie équipe. Le <span class='highlight'>CAP AEPE ou AES</span> ouvre les portes. Certains établissements forment directement leurs futurs agents !", choices: null, toVideo: true }
+    id:'aide', name:'Aide à la personne', icon:'🤝', color:'#EB94C2',
+    npcName:'Marie-Claire', npcRole:'Auxiliaire de vie · Dinard',
+    lat:48.6340, lng:-2.0670, xp:150,
+    videoFile:'',
+    videoTitle:'Aide à la personne en Ille-et-Vilaine',
+    questTitle:"Chez Marie-Claire",
+    questDesc:'Clique sur Marie-Claire à Dinard.',
+    dialogue:[
+      "Bonjour ! Auxiliaire de vie à Dinard depuis 8 ans. J'accompagne des personnes âgées et handicapées.",
+      "Ces métiers du lien sont parmi les plus recruteurs du 35. Des milliers de postes à pourvoir !"
+    ],
+    choices:[
+      {text:"Accompagner les seniors ?", reply:"Le Titre ADVF se prépare en quelques mois, financé par France Travail. Les emplois sont stables et très locaux, souvent à 5 minutes de chez soi."},
+      {text:"Travailler avec les personnes handicapées ?", reply:"Le DEAES (Diplôme d'État AES) est la voie royale. Des contrats en alternance partout dans le 35, avec une vraie reconnaissance du métier !"},
+      {text:"En EHPAD, c'est comment ?", reply:"C'est travailler en équipe dans un cadre structuré ! Le CAP AEPE ou AES ouvre les portes. Certains EHPAD forment directement leurs futurs agents."}
     ]
   }
 ];
 
-// ============================================================
-// ÉTAT DU JEU
-// ============================================================
-const state = {
-  started: false,
-  xp: 0,
-  level: 1,
-  xpPerLevel: 200,
-  completed: [],
-  currentJob: null,
-  dlgStep: 0,
-  dlgBranch: null,
-  awaitingChoice: false,
-  playerLat: 48.648, playerLng: -2.025
+// ══ STATE ══
+var S = {
+  hero: 'elio',
+  xp:0, completed:[], currentJob:null, step:0, timer:null, awaitChoice:false
 };
+var gmap, pMarker, toastTimer;
+var npcMarkers = {};
 
-// ============================================================
-// CARTE LEAFLET
-// ============================================================
-let map, playerMarker, playerCircle, npcMarkers = {};
+// ══ INIT ══
+window.addEventListener('DOMContentLoaded', function() {
+  // Vérifier si un héros est sélectionné (URL ou localStorage)
+  var params = new URLSearchParams(window.location.search);
+  var heroFromURL = params.get('hero');
+  var heroFromLS = localStorage.getItem('rdr_hero');
+  S.hero = heroFromURL || heroFromLS || null;
 
-// Lire le héros depuis l'URL ou localStorage
-var chosenHero = (new URLSearchParams(window.location.search)).get('hero') || localStorage.getItem('rdr_hero') || 'elio';
-var heroPortrait = chosenHero === 'elia' ? 'img/EliaPP.png' : 'img/ElioPP.png';
-var heroName = chosenHero === 'elia' ? 'Élia' : 'Élio';
-
-function initMap() {
-  map = L.map('map', {
-    center: [48.6484, -2.0254],
-    zoom: 13,
-    zoomControl: false,
-    attributionControl: true
-  });
-
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 18
-  }).addTo(map);
-
-  // Joueur
-  const playerIcon = L.divIcon({
-    className: '',
-    html: `<div class="player-marker-wrap">
-      <img src="" id="player-portrait-marker" onload="this.src=heroPortrait" style="width:46px;height:58px;object-fit:cover;border-radius:50%;border:2px solid #69408C;box-shadow:0 0 12px rgba(105,64,140,0.6);" />
-      <div class="player-name" id="player-name-marker">${heroName}</div>
-    </div>`,
-    iconSize: [50, 80],
-    iconAnchor: [25, 72]
-  });
-
-  playerMarker = L.marker([state.playerLat, state.playerLng], { icon: playerIcon, zIndexOffset: 1000 }).addTo(map);
-
-  playerCircle = L.circle([state.playerLat, state.playerLng], {
-    radius: 8000,
-    color: '#00A859',
-    fillColor: '#00A859',
-    fillOpacity: 0.05,
-    weight: 1.5,
-    opacity: 0.4,
-    className: 'prox-circle'
-  }).addTo(map);
-
-  // NPC markers
-  JOBS.forEach(job => {
-    const icon = L.divIcon({
-      className: '',
-      html: `<div class="npc-marker" id="npc-marker-${job.id}">
-        <div class="npc-icon-wrap" id="npc-icon-${job.id}">${job.icon}</div>
-        <div class="npc-label">${job.npcName}</div>
-      </div>`,
-      iconSize: [80, 70],
-      iconAnchor: [40, 60]
-    });
-    const marker = L.marker([job.lat, job.lng], { icon }).addTo(map);
-    marker.on('click', () => {
-      if (state.started && !state.completed.includes(job.id)) {
-        moveToNPC(job);
-      }
-    });
-    npcMarkers[job.id] = marker;
-  });
-}
-
-function moveToNPC(job) {
-  // Déplacer le joueur vers le NPC (approximatif)
-  const dlat = (job.lat - state.playerLat) * 0.85;
-  const dlng = (job.lng - state.playerLng) * 0.85;
-  state.playerLat += dlat;
-  state.playerLng += dlng;
-  updatePlayerPos(true);
-  setTimeout(() => startDialogue(job), 600);
-}
-
-function updatePlayerPos(fly = false) {
-  playerMarker.setLatLng([state.playerLat, state.playerLng]);
-  playerCircle.setLatLng([state.playerLat, state.playerLng]);
-  if (fly) {
-    map.flyTo([state.playerLat, state.playerLng], 10, { duration: 1.2 });
-  }
-}
-
-function movePlayer(dir) {
-  if (!state.started) return;
-  const step = 0.08;
-  if (dir === 'up') state.playerLat += step;
-  if (dir === 'down') state.playerLat -= step;
-  if (dir === 'left') state.playerLng -= step;
-  if (dir === 'right') state.playerLng += step;
-  updatePlayerPos();
-}
-
-function centerMap() {
-  map.flyTo([state.playerLat, state.playerLng], 9, { duration: 1 });
-}
-
-// ============================================================
-// DIALOGUE RPG
-// ============================================================
-function startDialogue(job) {
-  state.currentJob = job;
-  state.dlgStep = 0;
-  state.dlgBranch = null;
-  state.awaitingChoice = false;
-
-  document.getElementById('dlg-avatar').textContent = job.icon;
-  document.getElementById('dlg-npc-name').textContent = job.npcName;
-  document.getElementById('dlg-npc-role').textContent = job.npcRole;
-  document.getElementById('dlg-job-tag').textContent = `${job.icon} ${job.name}`;
-
-  // Barre de progression
-  const prog = document.getElementById('dlg-progress');
-  prog.innerHTML = '';
-  job.dialogue.forEach((_, i) => {
-    const s = document.createElement('div');
-    s.className = 'dlg-step';
-    s.id = `dlg-step-${i}`;
-    prog.appendChild(s);
-  });
-
-  document.getElementById('dialogue-overlay').classList.add('active');
-  showDlgStep(0);
-}
-
-function showDlgStep(idx) {
-  const job = state.currentJob;
-  if (!job) return;
-  const steps = job.dialogue;
-  if (idx >= steps.length) { closeDlgOpenVideo(); return; }
-
-  state.dlgStep = idx;
-  const step = state.dlgBranch !== null ? steps[state.dlgBranch] : steps[idx];
-  state.dlgBranch = null;
-
-  // Mettre à jour barre de progression
-  steps.forEach((_, i) => {
-    const el = document.getElementById(`dlg-step-${i}`);
-    if (!el) return;
-    el.className = 'dlg-step ' + (i < idx ? 'done' : i === idx ? 'current' : '');
-  });
-
-  // Texte avec effet machine à écrire
-  typewriterText('dlg-text', step.text, 22, () => {
-    if (step.choices) {
-      showChoices(step.choices);
-    }
-  });
-
-  // Choix ou continuer
-  const choicesArea = document.getElementById('choices-area');
-  choicesArea.innerHTML = '';
-  choicesArea.classList.remove('visible');
-  const cont = document.getElementById('dlg-continue');
-  cont.style.display = step.choices ? 'none' : 'flex';
-}
-
-function typewriterText(elId, html, speed, cb) {
-  const el = document.getElementById(elId);
-  el.innerHTML = '';
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  const full = tmp.innerHTML;
-  let i = 0;
-  let tag = false;
-  let buf = '';
-  const timer = setInterval(() => {
-    if (i >= full.length) {
-      el.innerHTML = full;
-      clearInterval(timer);
-      if (cb) cb();
-      return;
-    }
-    const ch = full[i];
-    if (ch === '<') tag = true;
-    if (tag) {
-      buf += ch;
-      if (ch === '>') { tag = false; el.innerHTML += buf; buf = ''; }
-    } else {
-      el.innerHTML += ch;
-    }
-    i++;
-  }, speed);
-}
-
-function showChoices(choices) {
-  const area = document.getElementById('choices-area');
-  area.innerHTML = '';
-  choices.forEach((c, i) => {
-    const letters = ['A', 'B', 'C', 'D'];
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-letter">${letters[i]}</span>${c.text}`;
-    btn.onclick = () => selectChoice(c);
-    area.appendChild(btn);
-  });
-  area.classList.add('visible');
-  state.awaitingChoice = true;
-  document.getElementById('dlg-continue').style.display = 'none';
-}
-
-function selectChoice(choice) {
-  const area = document.getElementById('choices-area');
-  area.classList.remove('visible');
-  state.awaitingChoice = false;
-  state.dlgBranch = choice.next;
-  const step = state.currentJob.dialogue[choice.next];
-  document.getElementById('dlg-continue').style.display = 'flex';
-
-  typewriterText('dlg-text', step.text, 22, () => {
-    if (step.toVideo) {
-      // Le prochain clic ouvre la vidéo
-      state.dlgBranch = 'toVideo';
-    }
-  });
-
-  // Update progress
-  const steps = state.currentJob.dialogue;
-  steps.forEach((_, i) => {
-    const el = document.getElementById(`dlg-step-${i}`);
-    if (el) el.className = 'dlg-step done';
-  });
-}
-
-function advanceDialogue() {
-  if (!state.started) return;
-  if (state.awaitingChoice) return;
-  if (!document.getElementById('dialogue-overlay').classList.contains('active')) return;
-
-  if (state.dlgBranch === 'toVideo') {
-    closeDlgOpenVideo();
+  // Si pas de héros → rediriger vers index.html
+  if (!S.hero) {
+    window.location.href = 'index.html';
     return;
   }
 
-  const job = state.currentJob;
-  const nextStep = state.dlgStep + 1;
+  // Charger les portraits avec fallback
+  loadPortraits();
 
-  if (nextStep >= job.dialogue.length) {
-    closeDlgOpenVideo();
-  } else {
-    showDlgStep(nextStep);
+  // Init carte
+  gmap = L.map('map', {
+    center: [48.635, -1.980],
+    zoom: 12,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  // Tuiles style aquarelle/BOTW via Stadia Stamen Watercolor
+  // Fallback sur OSM avec filtre
+  var tileUrl = 'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg';
+  var tileLayer = L.tileLayer(tileUrl, { maxZoom: 18 }).addTo(gmap);
+  tileLayer.on('tileerror', function() {
+    // Si Stadia échoue → OSM standard
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(gmap);
+  });
+
+  // Ajouter les marqueurs
+  pMarker = makePlayerMarker();
+  JOBS.forEach(function(j) { makeNPCMarker(j); });
+
+  // Clic carte → déplacer le joueur
+  gmap.on('click', function(e) {
+    pMarker.setLatLng(e.latlng);
+    checkProx(e.latlng);
+  });
+
+  // Appliquer l'UI du héros
+  applyHeroUI();
+
+  // Quête initiale
+  setQuest(JOBS[0].questTitle, JOBS[0].questDesc);
+});
+
+// ══ PORTRAITS ══
+function loadPortraits() {
+  // Si les images img/ chargent → les utiliser, sinon fallback base64
+  ['elio', 'elia'].forEach(function(h) {
+    var el = document.getElementById('sw-img-' + h);
+    if (el) {
+      el.onerror = function() { el.src = PP[h]; };
+    }
+  });
+  // Portrait dialogue : fallback immédiat
+  var dp = document.getElementById('dp');
+  dp.onerror = function() { dp.src = PP[S.hero]; };
+  dp.src = 'img/' + (S.hero === 'elia' ? 'EliaPP' : 'ElioPP') + '.png';
+}
+
+function heroImg() {
+  var el = document.getElementById('sw-img-' + S.hero);
+  if (el && el.complete && el.naturalWidth > 0) return el.src;
+  return PP[S.hero];
+}
+
+function heroName() { return S.hero === 'elia' ? 'Élia' : 'Élio'; }
+
+function applyHeroUI() {
+  document.getElementById('sw-elio').classList.toggle('active', S.hero === 'elio');
+  document.getElementById('sw-elia').classList.toggle('active', S.hero === 'elia');
+  document.getElementById('dp').src = heroImg();
+  var pm = document.getElementById('pm-portrait');
+  if (pm) pm.src = heroImg();
+  var pn = document.getElementById('pm-name');
+  if (pn) pn.textContent = heroName();
+}
+
+function switchHero(h) {
+  S.hero = h;
+  localStorage.setItem('rdr_hero', h);
+  applyHeroUI();
+  if (pMarker) { gmap.removeLayer(pMarker); pMarker = makePlayerMarker(); }
+  toast('🔄', 'Personnage changé !', 'Tu joues maintenant avec ' + heroName());
+}
+
+// ══ MARKERS ══
+function makePlayerMarker() {
+  var ic = L.divIcon({
+    className: '',
+    html: '<div class="player-wrap">' +
+          '<img id="pm-portrait" class="player-portrait" src="' + heroImg() + '" onerror="this.src=\'' + PP[S.hero] + '\'">' +
+          '<div id="pm-name" class="player-lbl">' + heroName() + '</div>' +
+          '</div>',
+    iconSize: [52, 76], iconAnchor: [26, 70]
+  });
+  return L.marker([48.649, -2.025], { icon: ic, zIndexOffset: 1000 }).addTo(gmap);
+}
+
+function makeNPCMarker(job) {
+  var done = S.completed.indexOf(job.id) > -1;
+  var ic = L.divIcon({
+    className: '',
+    html: '<div class="npc-wrap">' +
+          '<div class="npc-icon' + (done ? ' done' : '') + '" style="border-color:' + job.color + '">' + job.icon + '</div>' +
+          '<div class="npc-lbl">' + job.npcName + '</div>' +
+          '</div>',
+    iconSize: [70, 72], iconAnchor: [35, 68]
+  });
+  var m = L.marker([job.lat, job.lng], { icon: ic }).addTo(gmap);
+  if (!done) m.on('click', function() { openJob(job); });
+  npcMarkers[job.id] = m;
+  return m;
+}
+
+function checkProx(ll) {
+  JOBS.forEach(function(j) {
+    if (S.completed.indexOf(j.id) > -1) return;
+    if (gmap.distance(ll, [j.lat, j.lng]) < 600) openJob(j);
+  });
+}
+
+// ══ DIALOGUE NPC ══
+function openJob(job) {
+  S.currentJob = job; S.step = 0; S.awaitChoice = false;
+  document.getElementById('dp').src = heroImg();
+  document.getElementById('dnn').textContent = job.npcName;
+  document.getElementById('dnr').textContent = job.npcRole;
+  document.getElementById('djt').textContent = job.icon + ' ' + job.name;
+  document.getElementById('dlg-choices').style.display = 'none';
+  document.getElementById('dlg-choices').innerHTML = '';
+  // Dots
+  var dd = document.getElementById('dds'); dd.innerHTML = '';
+  job.dialogue.forEach(function(_, i) {
+    var d = document.createElement('div');
+    d.className = 'dd' + (i === 0 ? ' on' : ''); d.id = 'dd' + i; dd.appendChild(d);
+  });
+  document.getElementById('dlg').classList.add('open');
+  typeText('dlg-txt', job.dialogue[0], function() {
+    if (job.dialogue.length === 1) showChoices();
+  });
+  setQuest(job.questTitle, 'Parle à ' + job.npcName);
+}
+
+function onDlgClick(e) {
+  if (e.target.closest('.dlg-x') || e.target.closest('.cbtn')) return;
+  advDlg();
+}
+
+function advDlg() {
+  var job = S.currentJob; if (!job || S.awaitChoice) return;
+  var el = document.getElementById('dlg-txt');
+  // Si texte en cours → compléter d'abord
+  if (el.dataset.typing === '1') {
+    clearInterval(S.timer);
+    el.textContent = el.dataset.full || '';
+    el.dataset.typing = '0';
+    if (S.step >= job.dialogue.length - 1) showChoices();
+    return;
   }
+  S.step++;
+  if (S.step < job.dialogue.length) {
+    for (var i = 0; i < job.dialogue.length; i++) {
+      var d = document.getElementById('dd' + i);
+      if (d) d.className = 'dd' + (i < S.step ? ' done' : i === S.step ? ' on' : '');
+    }
+    typeText('dlg-txt', job.dialogue[S.step], function() {
+      if (S.step >= job.dialogue.length - 1) showChoices();
+    });
+  } else showChoices();
 }
 
-function skipDialogue() {
-  closeDlgOpenVideo();
+function showChoices() {
+  var job = S.currentJob; if (!job) return;
+  S.awaitChoice = true;
+  var area = document.getElementById('dlg-choices');
+  area.innerHTML = '';
+  var ltrs = ['A', 'B', 'C', 'D'];
+  job.choices.forEach(function(c, i) {
+    var b = document.createElement('button');
+    b.className = 'cbtn';
+    b.innerHTML = '<span class="cltr">' + ltrs[i] + '</span>' + c.text;
+    b.onclick = function() { pickChoice(c); };
+    area.appendChild(b);
+  });
+  area.style.display = 'block';
 }
 
-function closeDlgOpenVideo() {
-  document.getElementById('dialogue-overlay').classList.remove('active');
-  if (state.currentJob) openVideoModal(state.currentJob);
+function pickChoice(c) {
+  // Afficher la réponse dans le dialogue, puis ouvrir la modal vidéo
+  document.getElementById('dlg-choices').style.display = 'none';
+  S.awaitChoice = false;
+  typeText('dlg-txt', c.reply, function() {
+    setTimeout(function() {
+      closeDlg();
+      openVM(S.currentJob, c);
+    }, 700);
+  });
 }
 
-// ============================================================
-// VIDÉO
-// ============================================================
-function openVideoModal(job) {
-  document.getElementById('vm-icon').textContent = job.icon;
-  document.getElementById('vm-title').textContent = job.name;
-  document.getElementById('vm-sub').textContent = `${job.npcName} · ${job.npcRole}`;
-  document.getElementById('ph-title').textContent = job.videoTitle;
-  document.getElementById('ph-dur').textContent = job.videoDuration;
-  document.getElementById('vm-reward-text').textContent = job.reward;
-
-  // Reset placeholder
-  const ph = document.getElementById('video-ph');
-  ph.innerHTML = `
-    <div class="play-ring">▶</div>
-    <div class="ph-title" id="ph-title">${job.videoTitle}</div>
-    <div class="ph-sub">Clique pour lancer la vidéo de présentation du métier</div>
-    <div class="dur-tag">${job.videoDuration}</div>
-  `;
-  ph.onclick = playVideoMock;
-
-  document.getElementById('video-overlay').classList.add('active');
+function closeDlg() {
+  document.getElementById('dlg').classList.remove('open');
+  clearInterval(S.timer);
 }
 
-function playVideoMock() {
-  const ph = document.getElementById('video-ph');
-  ph.innerHTML = `
-    <div style="font-size:44px;margin-bottom:8px">📺</div>
-    <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:6px">Vidéo en lecture…</div>
-    <div style="color:var(--muted);font-size:12px;text-align:center;line-height:1.6;max-width:360px">
-      Remplace ce placeholder par un <strong style="color:#fff">iframe YouTube</strong><br>
-      en ajoutant un champ <code style="color:var(--green)">videoUrl</code> dans l'objet du métier.
-    </div>
-    <div style="margin-top:14px;background:rgba(0,168,89,0.1);border:1px solid rgba(0,168,89,0.3);border-radius:8px;padding:8px 14px;color:var(--green);font-size:11px;font-weight:700">
-      💡 Exemple : videoUrl: "https://youtube.com/embed/XXXXX"
-    </div>
-  `;
-  ph.onclick = null;
+// ══ MODAL VIDÉO ══
+function openVM(job, pickedChoice) {
+  if (!job) return;
+
+  document.getElementById('vi').textContent = job.icon;
+  document.getElementById('vt').textContent = job.name;
+  document.getElementById('vs').textContent = job.npcName + ' · Ille-et-Vilaine';
+  document.getElementById('vrt').textContent = '+' + job.xp + ' XP · Badge ' + job.icon + ' ' + job.name;
+
+  // Vidéo
+  var vid = document.getElementById('vvid');
+  var ph = document.getElementById('vph');
+  if (job.videoFile) {
+    vid.src = job.videoFile;
+    vid.classList.add('active');
+    ph.style.display = 'none';
+  } else {
+    vid.src = '';
+    vid.classList.remove('active');
+    ph.style.display = 'flex';
+  }
+
+  // Choix dans la modale
+  document.getElementById('vdq').textContent = 'Qu\'est-ce qui t\'intéresse dans ce métier ?';
+  document.getElementById('vdr').textContent = '';
+  document.getElementById('vdr').classList.remove('show');
+  var vc = document.getElementById('vcs'); vc.innerHTML = '';
+  var ltrs = ['A', 'B', 'C'];
+  (job.choices || []).forEach(function(c, i) {
+    var b = document.createElement('button');
+    b.className = 'vc' + (pickedChoice === c ? ' picked' : '');
+    b.innerHTML = '<span class="vcl">' + ltrs[i] + '</span>' + c.text;
+    b.onclick = function() {
+      document.querySelectorAll('.vc').forEach(function(x) { x.classList.remove('picked'); });
+      b.classList.add('picked');
+      document.getElementById('vdr').textContent = c.reply;
+      document.getElementById('vdr').classList.add('show');
+    };
+    vc.appendChild(b);
+  });
+
+  // Si un choix a déjà été fait, afficher la réponse
+  if (pickedChoice) {
+    document.getElementById('vdr').textContent = pickedChoice.reply;
+    document.getElementById('vdr').classList.add('show');
+  }
+
+  document.getElementById('voverlay').classList.add('open');
 }
 
-function closeVideo() {
-  document.getElementById('video-overlay').classList.remove('active');
+function closeVM() {
+  document.getElementById('voverlay').classList.remove('open');
+  var v = document.getElementById('vvid'); v.pause(); v.src = '';
+  v.classList.remove('active');
 }
 
 function validateQuest() {
-  const job = state.currentJob;
-  if (!job) return;
-  closeVideo();
-  state.completed.push(job.id);
-  addXP(job.xp);
-  updateCarnet();
-  showToast(job.icon, `${job.name} débloqué !`, `${job.reward}`);
-
-  // Marquer NPC comme terminé
-  const iconEl = document.getElementById(`npc-icon-${job.id}`);
-  if (iconEl) iconEl.classList.add('done');
-
-  // Prochaine quête ou victoire
-  if (state.completed.length >= JOBS.length) {
-    setTimeout(() => {
-      document.getElementById('vic-xp').textContent = state.xp + ' XP';
-      document.getElementById('victory-screen').style.display = 'flex';
-    }, 1000);
+  var job = S.currentJob; if (!job) return;
+  if (S.completed.indexOf(job.id) > -1) { closeVM(); return; }
+  S.completed.push(job.id);
+  S.xp += job.xp;
+  updateXP(); closeVM();
+  toast(job.icon, job.name + ' découvert !', '+' + job.xp + ' XP · Badge débloqué !');
+  document.getElementById('jv').textContent = S.completed.length;
+  // Rafraîchir marqueur NPC
+  if (npcMarkers[job.id]) { gmap.removeLayer(npcMarkers[job.id]); makeNPCMarker(job); }
+  // Prochaine quête
+  var next = JOBS.find(function(j) { return S.completed.indexOf(j.id) === -1; });
+  if (next) setQuest(next.questTitle, next.questDesc);
+  else {
+    setQuest('🏆 Bravo !', 'Tu as découvert les 5 métiers du 35 !');
+    setTimeout(function() { toast('🏆', 'Félicitations !', 'Tu as découvert les 5 métiers du 35 !'); }, 1500);
   }
 }
 
-// ============================================================
-// XP & NIVEAU
-// ============================================================
-function addXP(amount) {
-  state.xp += amount;
-  // Level up check
-  while (state.xp >= state.level * state.xpPerLevel) {
-    state.level++;
-    showToast('⬆️', `Niveau ${state.level} !`, 'Tu montes en compétences !');
+// ══ UTILS ══
+function typeText(id, txt, done) {
+  clearInterval(S.timer);
+  var el = document.getElementById(id);
+  el.textContent = ''; el.dataset.full = txt; el.dataset.typing = '1';
+  var i = 0;
+  S.timer = setInterval(function() {
+    if (i >= txt.length) { clearInterval(S.timer); el.dataset.typing = '0'; if (done) done(); return; }
+    el.textContent += txt[i++];
+  }, 22);
+}
+
+function updateXP() {
+  var p = Math.min(100, (S.xp / 750) * 100);
+  document.getElementById('xpf').style.width = p + '%';
+  document.getElementById('xpv').textContent = S.xp;
+}
+
+function setQuest(t, d) {
+  document.getElementById('q-title').textContent = t;
+  document.getElementById('q-desc').textContent = d;
+}
+
+function toast(icon, msg, sub) {
+  document.getElementById('ti').textContent = icon;
+  document.getElementById('tm').textContent = msg;
+  document.getElementById('ts').textContent = sub;
+  var t = document.getElementById('toast');
+  t.classList.add('show'); clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+
+// ══ CLAVIER ══
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    if (document.getElementById('dlg').classList.contains('open')) advDlg();
   }
-  updateXPBar();
-}
-
-function updateXPBar() {
-  const prevLevelXP = (state.level - 1) * state.xpPerLevel;
-  const nextLevelXP = state.level * state.xpPerLevel;
-  const pct = Math.min(100, ((state.xp - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100);
-  document.getElementById('xp-fill').style.width = pct + '%';
-  document.getElementById('xp-cur').textContent = state.xp;
-  document.getElementById('xp-next').textContent = nextLevelXP;
-  document.getElementById('level-num').textContent = state.level;
-}
-
-// ============================================================
-// CARNET MÉTIERS
-// ============================================================
-function buildCarnet() {
-  const body = document.getElementById('carnet-body');
-  body.innerHTML = '';
-  JOBS.forEach(job => {
-    const unlocked = state.completed.includes(job.id);
-    const card = document.createElement('div');
-    card.className = 'job-card' + (unlocked ? ' unlocked' : '');
-    card.id = `carnet-${job.id}`;
-
-    if (unlocked) {
-      card.innerHTML = `
-        <div class="card-top">
-          <div class="card-icon">${job.icon}</div>
-          <div class="card-info">
-            <h3>${job.name}</h3>
-            <p>${job.npcName} · ${job.npcRole.split('·')[1]?.trim() || ''}</p>
-          </div>
-          <div class="xp-earned-badge">+${job.xp} XP</div>
-        </div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">${job.description}</p>
-        <div class="card-tags">${job.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      `;
-    } else {
-      card.innerHTML = `
-        <div class="card-top">
-          <div class="card-icon" style="filter:grayscale(1)">❓</div>
-          <div class="card-info">
-            <h3 style="color:var(--muted)">${job.name}</h3>
-            <p>Non découvert</p>
-          </div>
-        </div>
-        <div class="locked-msg">🔒 Trouve ${job.npcName} sur la carte pour débloquer ce métier</div>
-      `;
-    }
-    body.appendChild(card);
-  });
-}
-
-function updateCarnet() {
-  buildCarnet();
-}
-
-function toggleCarnet() {
-  const panel = document.getElementById('side-panel');
-  const btn = document.getElementById('btn-carnet');
-  panel.classList.toggle('open');
-  btn.classList.toggle('active');
-  if (panel.classList.contains('open')) buildCarnet();
-}
-
-// ============================================================
-// TOAST
-// ============================================================
-let toastTimer = null;
-function showToast(icon, msg, sub) {
-  document.getElementById('toast-icon').textContent = icon;
-  document.getElementById('toast-msg').textContent = msg;
-  document.getElementById('toast-sub').textContent = sub;
-  const toast = document.getElementById('toast');
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
-}
-
-// ============================================================
-// MANETTE
-// ============================================================
-let lastPadState = {};
-window.addEventListener('gamepadconnected', (e) => {
-  document.getElementById('gp-dot').classList.add('on');
-  document.getElementById('gp-label').textContent = e.gamepad.id.substring(0, 50) + ' · connectée ✓';
-});
-window.addEventListener('gamepaddisconnected', () => {
-  document.getElementById('gp-dot').classList.remove('on');
-  document.getElementById('gp-label').textContent = 'Manette non connectée';
+  if (e.code === 'Escape') { closeDlg(); closeVM(); }
 });
 
-let padMoveTimer = null;
-function pollGamepad() {
-  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-  for (const pad of pads) {
-    if (!pad) continue;
-    // Axes joystick gauche
-    const ax = pad.axes[0], ay = pad.axes[1];
-    const thr = 0.35;
-    if (!padMoveTimer) {
-      if (ax < -thr) { movePlayer('left'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      else if (ax > thr) { movePlayer('right'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      if (ay < -thr) { movePlayer('up'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      else if (ay > thr) { movePlayer('down'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      // D-pad
-      if (pad.buttons[14]?.pressed) { movePlayer('left'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      if (pad.buttons[15]?.pressed) { movePlayer('right'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      if (pad.buttons[12]?.pressed) { movePlayer('up'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
-      if (pad.buttons[13]?.pressed) { movePlayer('down'); padMoveTimer = setTimeout(() => padMoveTimer = null, 200); }
+// ══ MANETTE ══
+(function pad() {
+  var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  var prevX = false;
+  for (var i = 0; i < pads.length; i++) {
+    var p = pads[i]; if (!p) continue;
+    var ax = p.axes[0], ay = p.axes[1], thr = 0.3, s = 0.0016;
+    if (Math.abs(ax) > thr || Math.abs(ay) > thr) {
+      var ll = pMarker.getLatLng();
+      pMarker.setLatLng([ll.lat - ay * s, ll.lng + ax * s * 1.5]);
     }
-    // Bouton ✕ (0) = interagir/avancer dialogue
-    const xBtn = pad.buttons[0];
-    if (xBtn?.pressed && !lastPadState.x) {
-      if (!state.started) startGame();
-      else advanceDialogue();
+    if (p.buttons[12] && p.buttons[12].pressed) { var ll2=pMarker.getLatLng(); pMarker.setLatLng([ll2.lat+s*2, ll2.lng]); }
+    if (p.buttons[13] && p.buttons[13].pressed) { var ll3=pMarker.getLatLng(); pMarker.setLatLng([ll3.lat-s*2, ll3.lng]); }
+    if (p.buttons[14] && p.buttons[14].pressed) { var ll4=pMarker.getLatLng(); pMarker.setLatLng([ll4.lat, ll4.lng-s*3]); }
+    if (p.buttons[15] && p.buttons[15].pressed) { var ll5=pMarker.getLatLng(); pMarker.setLatLng([ll5.lat, ll5.lng+s*3]); }
+    var xPressed = p.buttons[0] && p.buttons[0].pressed;
+    if (xPressed && !prevX) {
+      if (document.getElementById('dlg').classList.contains('open')) advDlg();
     }
-    lastPadState.x = xBtn?.pressed;
-    // Bouton Options (9) = carnet
-    const optBtn = pad.buttons[9];
-    if (optBtn?.pressed && !lastPadState.opt) toggleCarnet();
-    lastPadState.opt = optBtn?.pressed;
+    prevX = xPressed;
   }
-  requestAnimationFrame(pollGamepad);
-}
-pollGamepad();
+  requestAnimationFrame(pad);
+})();
 
-// ============================================================
-// CLAVIER
-// ============================================================
-document.addEventListener('keydown', (e) => {
-  if (!state.started && (e.code === 'Space' || e.code === 'Enter')) { startGame(); return; }
-  if (!state.started) return;
-
-  const km = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
-                KeyZ:'up', KeyS:'down', KeyQ:'left', KeyD:'right' };
-  if (km[e.code]) { movePlayer(km[e.code]); e.preventDefault(); return; }
-  if (e.code === 'Space' || e.code === 'Enter') { advanceDialogue(); e.preventDefault(); }
-  if (e.code === 'KeyI' || e.code === 'KeyC') toggleCarnet();
-  if (e.code === 'Escape') {
-    closeVideo();
-    document.getElementById('dialogue-overlay').classList.remove('active');
-  }
+// Clic sur le dialogue (délégation)
+document.getElementById('dlg').addEventListener('click', function(e) {
+  if (e.target.closest('.dlg-x') || e.target.closest('.cbtn')) return;
+  advDlg();
 });
-
-// Clic sur la carte = déplacer le joueur
-function onMapClick(e) {
-  if (!state.started) return;
-  state.playerLat = e.latlng.lat;
-  state.playerLng = e.latlng.lng;
-  updatePlayerPos();
-
-  // Vérifier si proche d'un NPC
-  JOBS.forEach(job => {
-    if (state.completed.includes(job.id)) return;
-    const dist = map.distance([state.playerLat, state.playerLng], [job.lat, job.lng]);
-    if (dist < 15000) startDialogue(job);
-  });
-}
-
-// ============================================================
-// DÉMARRAGE / RESTART
-// ============================================================
-function startGame() {
-  state.started = true;
-  document.getElementById('title-screen').style.display = 'none';
-  map.on('click', onMapClick);
-  showToast('🗺️', 'Bienvenue en Ille-et-Vilaine !', 'Clique sur un PNJ ou déplace-toi avec ZQSD');
-}
-
-function restartGame() {
-  state.xp = 0; state.level = 1; state.completed = []; state.currentJob = null;
-  state.dlgStep = 0; state.playerLat = 48.2; state.playerLng = -1.6;
-  state.dlgBranch = null; state.awaitingChoice = false;
-  updateXPBar();
-  updatePlayerPos();
-  // Réinitialiser marqueurs
-  JOBS.forEach(job => {
-    const el = document.getElementById(`npc-icon-${job.id}`);
-    if (el) el.classList.remove('done');
-  });
-  document.getElementById('victory-screen').style.display = 'none';
-  document.getElementById('dialogue-overlay').classList.remove('active');
-  document.getElementById('video-overlay').classList.remove('active');
-  document.getElementById('title-screen').style.display = 'flex';
-  state.started = false;
-  map.off('click', onMapClick);
-  centerMap();
-}
-
-// ============================================================
-// INIT
-// ============================================================
-initMap();
 </script>
 </body>
 </html>
