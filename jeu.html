@@ -65,12 +65,7 @@ body{font-family:'Nunito',sans-serif;color:var(--text);}
 
 /* Style Zelda BOTW : tuiles en aquarelle/peinture */
 .leaflet-tile-pane{
-  filter:
-    sepia(0.5)
-    saturate(1.8)
-    brightness(0.82)
-    contrast(1.1)
-    hue-rotate(8deg);
+  filter: sepia(0.6) saturate(2.2) brightness(0.78) contrast(1.18) hue-rotate(12deg);
 }
 /* Grille parchemin */
 #map::before{
@@ -543,16 +538,10 @@ window.addEventListener('DOMContentLoaded', function() {
     attributionControl: false
   });
 
-  // Tuiles style aquarelle/BOTW via Stadia Stamen Watercolor
-  // Fallback sur OSM avec filtre
-  var tileUrl = 'https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg';
-  var tileLayer = L.tileLayer(tileUrl, { maxZoom: 18 }).addTo(gmap);
-  tileLayer.on('tileerror', function() {
-    // Si Stadia échoue → OSM standard
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18
-    }).addTo(gmap);
-  });
+  // CartoDB Voyager (libre, sans clé API) + filtre CSS style Zelda/peinture
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO'
+  }).addTo(gmap);
 
   // Ajouter les marqueurs
   pMarker = makePlayerMarker();
@@ -617,7 +606,7 @@ function makePlayerMarker() {
   var ic = L.divIcon({
     className: '',
     html: '<div class="player-wrap">' +
-          '<img id="pm-portrait" class="player-portrait" src="' + heroImg() + '" onerror="this.src='' + PP[S.hero] + ''">' +
+          '<img id="pm-portrait" class="player-portrait" src="' + heroImg() + '">' +
           '<div id="pm-name" class="player-lbl">' + heroName() + '</div>' +
           '</div>',
     iconSize: [52, 76], iconAnchor: [26, 70]
@@ -627,11 +616,11 @@ function makePlayerMarker() {
 
 function makeNPCMarker(job) {
   var done = S.completed.indexOf(job.id) > -1;
+  var iconInner = job.npcPhoto
+    ? '<img src="' + job.npcPhoto + '" onerror="this.parentNode.innerHTML=\'' + job.icon + '\'" alt="' + job.npcName + '">'
+    : job.icon;
   var ic = L.divIcon({
     className: '',
-    var iconInner = job.npcPhoto
-      ? '<img src="' + job.npcPhoto + '" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'" alt="' + job.npcName + '"><span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">' + job.icon + '</span>'
-      : job.icon;
     html: '<div class="npc-wrap">' +
           '<div class="npc-icon' + (done ? ' done' : '') + '" style="border-color:' + job.color + '">' + iconInner + '</div>' +
           '<div class="npc-lbl">' + job.npcName + '</div>' +
