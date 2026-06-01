@@ -243,7 +243,7 @@ body{font-family:'Nunito',sans-serif;color:var(--text);background:#0d0d1a;}
   <!-- Dialogue incrusté sur vidéo -->
   <div id="dlg">
     <div class="dlg-head">
-      <img class="dlg-portrait" id="dlg-portrait" src="img/ElioPP.png">
+      <img class="dlg-portrait" id="dlg-portrait" src="img/ELIOPP.png">
       <div class="dlg-info">
         <div class="dlg-nname" id="dlg-nname">Élio</div>
         <div class="dlg-nrole" id="dlg-nrole">Explorateur · France Travail 35</div>
@@ -263,7 +263,7 @@ body{font-family:'Nunito',sans-serif;color:var(--text);background:#0d0d1a;}
     <div class="pop-card">
       <div class="pop-head">
         <button class="pop-close" onclick="closePopup()">✕</button>
-        <img class="pop-portrait" id="pop-portrait" src="img/ElioPP.png">
+        <img class="pop-portrait" id="pop-portrait" src="img/ELIOPP.png">
         <div>
           <h2 id="pop-name">Élio</h2>
           <p id="pop-role">Explorateur France Travail · Niveau 1</p>
@@ -394,7 +394,7 @@ function launch(key) {
     document.getElementById('screen-pick').classList.add('hidden');
     document.getElementById('screen-game').classList.add('visible');
     f.style.opacity = '0';
-    initIntroMap();
+    // initIntroMap();
     startSequence(h, portraitSrc);
   }, 300);
 }
