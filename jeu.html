@@ -876,11 +876,11 @@ body{font-family:'Nunito',sans-serif;color:var(--text);}
   <div class="tb-switcher">
     <span class="sw-label">Perso :</span>
     <div class="hero-sw active" id="sw-elio" onclick="switchHero('elio')">
-      <img id="sw-img-elio" src="img/ElioPP.png" alt="Élio">
+      <img id="sw-img-elio" src="assets/img/ElioPP.png" alt="Élio">
       <span class="hero-sw-name">Élio</span>
     </div>
     <div class="hero-sw" id="sw-elia" onclick="switchHero('elia')">
-      <img id="sw-img-elia" src="img/EliaPP.png" alt="Élia">
+      <img id="sw-img-elia" src="assets/img/EliaPP.png" alt="Élia">
       <span class="hero-sw-name">Élia</span>
     </div>
   </div>
@@ -899,13 +899,13 @@ body{font-family:'Nunito',sans-serif;color:var(--text);}
 </div>
 
 <!-- MUSIQUE DE FOND -->
-<audio id="bgm" src="Theme.mp3" loop></audio>
+<audio id="bgm" src="assets/sounds/Theme.mp3" loop></audio>
 
 <!-- Vagues en boucle -->
-<audio id="waves" src="waves.mp3" loop></audio>
+<audio id="waves" src="assets/sounds/waves.mp3" loop></audio>
 
 <!-- Mouettes aléatoires -->
-<audio id="seagull" src="mouettes.mp3" preload="auto"></audio>
+<audio id="seagull" src="assets/sounds/mouettes.mp3" preload="auto"></audio>
 
 <!-- MAP -->
 <div id="map"></div>
@@ -920,7 +920,7 @@ body{font-family:'Nunito',sans-serif;color:var(--text);}
 <!-- DIALOGUE NPC -->
 <div id="dlg">
   <div class="dlg-head">
-    <img class="dlg-portrait" id="dp" src="img/ElioPP.png">
+    <img class="dlg-portrait" id="dp" src="assets/img/ElioPP.png">
     <div class="dlg-info">
       <div class="dlg-nname" id="dnn">—</div>
       <div class="dlg-nrole" id="dnr">—</div>
@@ -1298,9 +1298,9 @@ var JOBS = [
   {
     id:'maritime', name:'Maritime', icon:'⚓', color:'#406BDE',
     npcName:'Morgane', npcRole:'Officière de pêche · Saint-Malo',
-    npcPhoto:'img/MorganePP.png',
+    npcPhoto:'assets/img/MorganePP.png',
     lat:48.6490, lng:-2.0250, xp:150,
-    videoFile:'Morgane1.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Morgane1.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/hlov7EFUT7E',
     videoTitle:'Les métiers de la mer en Bretagne',
     questTitle:"L'appel de la mer",
@@ -1319,9 +1319,9 @@ var JOBS = [
   {
     id:'agriculture', name:'Agriculture bio', icon:'🌾', color:'#8B5BB8',
     npcName:'Sarah', npcRole:'Agricultrice bio · Dol-de-Bretagne',
-    npcPhoto:'img/SarahPP.png',
+    npcPhoto:'assets/img/SarahPP.png',
     lat:48.5540, lng:-1.7500, xp:150,
-    videoFile:'Sarah.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Sarah.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/ld61odTHtmQ',
     videoTitle:"Agriculture bio en Ille-et-Vilaine",
     questTitle:"La ferme de Sarah",
@@ -1340,9 +1340,9 @@ var JOBS = [
   {
     id:'restauration', name:'Restauration', icon:'🍽️', color:'#FFCC52',
     npcName:'Sophie', npcRole:'Cheffe cuisinière · Cancale',
-    npcPhoto:'img/SophiePP.png',
+    npcPhoto:'assets/img/SophiePP.png',
     lat:48.6720, lng:-1.8470, xp:150,
-    videoFile:'Sophie.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Sophie.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/2S3sDu4qA5Q',
     videoTitle:'Restauration & Hôtellerie en Bretagne',
     questTitle:"La crêperie de Sophie",
@@ -1361,9 +1361,9 @@ var JOBS = [
   {
     id:'nucleaire', name:'Nucléaire', icon:'⚛️', color:'#EB6366',
     npcName:'Nathan', npcRole:'Conducteur de travaux · Miniac-Morvan',
-    npcPhoto:'img/NathanPP.png',
+    npcPhoto:'assets/img/NathanPP.png',
     lat:48.5060, lng:-1.8970, xp:150,
-    videoFile:'Nathan.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Nathan.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/ZFnOWlLyNbs',
     videoTitle:'Métiers du nucléaire en Bretagne',
     questTitle:"Le chantier de Nathan",
@@ -1382,9 +1382,9 @@ var JOBS = [
   {
     id:'aide', name:'Aide à la personne', icon:'🤝', color:'#D9C9E5',
     npcName:'Claire', npcRole:'Auxiliaire de vie · Dinan',
-    npcPhoto:'img/ClairePP.png',
+    npcPhoto:'assets/img/ClairePP.png',
     lat:48.4550, lng:-2.0470, xp:150,
-    videoFile:'Claire.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Claire.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/F-VOm1wzwvY',
     videoTitle:'Aide à la personne en Ille-et-Vilaine',
     questTitle:"Chez Claire",
@@ -1403,9 +1403,9 @@ var JOBS = [
   {
     id:'manu', name:'Restauration', icon:'🥂', color:'#FFDE8C',
     npcName:'Manu', npcRole:'Serveur · Saint-Briac-sur-Mer',
-    npcPhoto:'img/ManuPP.png',
+    npcPhoto:'assets/img/ManuPP.png',
     lat:48.6340, lng:-2.1330, xp:150,
-    videoFile:'Manu.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Manu.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/NYyxxNX2s0s',
     videoTitle:'Métiers de la salle & service',
     questTitle:"La table de Manu",
@@ -1424,9 +1424,9 @@ var JOBS = [
   {
     id:'florian', name:'Industrie', icon:'🔧', color:'#B0BFF0',
     npcName:'Florian', npcRole:'Chaudronnier · Combourg',
-    npcPhoto:'img/FlorianPP.png',
+    npcPhoto:'assets/img/FlorianPP.png',
     lat:48.4120, lng:-1.7480, xp:150,
-    videoFile:'Florian.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Florian.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/wBEamqw5g3o',
     videoTitle:'Chaudronnerie & Métallurgie',
     questTitle:"L'atelier de Florian",
@@ -1445,9 +1445,9 @@ var JOBS = [
   {
     id:'Laetitia', name:'Petite enfance', icon:'👶', color:'#F0C9DE',
     npcName:'Laetitia', npcRole:"Éducatrice de jeunes enfants · La Fresnais",
-    npcPhoto:'img/LaetitiaPP.png',
+    npcPhoto:'assets/img/LaetitiaPP.png',
     lat:48.5900, lng:-1.8400, xp:150,
-    videoFile:'Laetitia.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Laetitia.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/UKJ2awXwErU',
     videoTitle:'Petite enfance & Éducation',
     questTitle:"La crèche de Laetitia",
@@ -1466,9 +1466,9 @@ var JOBS = [
   {
     id:'jeremy', name:'Mécanique', icon:'🔩', color:'#F5A39E',
     npcName:'Jeanne', npcRole:"Cheffe d'atelier · Antrain",
-    npcPhoto:'img/JeannePP.png',
+    npcPhoto:'assets/img/JeannePP.png',
     lat:48.4650, lng:-1.4900, xp:150,
-    videoFile:'Jeanne.mp4', videoInDialogue:true,
+    videoFile:'assets/videos/Jeanne.mp4', videoInDialogue:true,
     questVideo:'https://www.youtube.com/embed/erflQIu7kno',
     videoTitle:"Mécanique & Chef d'atelier",
     questTitle:"L'atelier de Jeanne",
@@ -1640,7 +1640,7 @@ function loadPortraits() {
   // Portrait dialogue : fallback immédiat
   var dp = document.getElementById('dp');
   dp.onerror = function() { dp.src = PP[S.hero]; };
-  dp.src = 'img/' + (S.hero === 'elia' ? 'EliaPP' : 'ElioPP') + '.png';
+  dp.src = 'assets/img/' + (S.hero === 'elia' ? 'EliaPP' : 'ElioPP') + '.png';
 }
 
 function heroImg() {
