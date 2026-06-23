@@ -1,0 +1,3 @@
+- on vas changer le site pour tourner avec npm et vite pour avoir des moyen de tester
+- on vas faire du typescript 
+- on vas faire tout sans base de donnée donc le backend est pas necessaire
