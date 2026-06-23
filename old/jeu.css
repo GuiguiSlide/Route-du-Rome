@@ -2098,7 +2098,10 @@ body {
     box-shadow: 0 4px 12px rgba(105, 64, 140, 0.4);
 }
 
-.tuto-step-text {}
+.tuto-step-text {
+    font-size: 13px;
+    font-weight: 700;
+}
 
 .tuto-step-title {
     font-size: 14px;
