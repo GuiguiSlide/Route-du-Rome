@@ -1,16 +1,20 @@
-# a garder en tête au moment du developpement
+# Devlog
 
-- tout ce qui fonctionne on touche pas, les interfaces ne doivent pas changer on veux juste que tout fonctionne
+## À garder en tête
 
-# j-1
+- Tout ce qui fonctionne doit rester en place.
+- Les interfaces ne doivent pas changer : l'objectif est de refondre techniquement sans modifier l'expérience utilisateur.
 
--    j'ai commencé par ranger toutes les assets dans de nouveaux dossiers différents et a rerouter tout ce qu'il y as dans le code
--    puis j'ai séparé du html les scripts et les styles
--    j'ai installé vite, ts et réorganisé le projet
--    maintenant je fais une analyse de données et de choses a changer
--    j'ai fait la conception
--    après je compte faire le merise: mcd/mld/uml
+## J-1
 
+- Rangé les assets dans des dossiers séparés et mis à jour les chemins.
+- Séparé les scripts et les styles du HTML.
+- Installé Vite, TypeScript et réorganisé le projet.
+- Commencé l'analyse des données et des points à corriger.
+- Réalisé la conception.
+- Prochaine étape : Merise (MCD / MLD / UML).
 
-# j-2
+## J-2
+
+- (À faire)
 

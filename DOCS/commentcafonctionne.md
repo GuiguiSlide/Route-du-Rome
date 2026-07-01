@@ -1,8 +1,11 @@
-- donc on arrive sur la premiere page on vois france travail et **ille et vilaine** on voie aussi **deux choix d'explorateurs** on peut cliquer dessur et choisir son personnage
-- après avoir cliqué sur un personnage on as une video d'introduction du personnage on as du texte ou il faut cliquer dessus après le dialogue on peut passer(non)
-- on as une alerte ou on peut cliquer sur fermer(softlock) ou démmarer l'aventure 
-- après avoir cliquer sur demmarer l'aventure on nous change de page vers jeu.html
-- on as une carte ou on peux choisir une personne a qui parler, on as un systeme de badge, on peu changer de perso ou aller a l'acceuil en bas a droite on as notre quete actuelle on peut aussi cliquer sur la carte pour se déplacer(inutile)
-- donc on clique sur un intervenant on as du dialogue et on peut poser des questions et après avoir poser des questions ça nous mets sur une video 
-- quand on clique sur quete accomplie on obtien de l'xp on obtien un badge on retourne sur la carte et l'intervenant est coché et mis en transparence  
-- quand on complete toute les quetes on as un ecran de fin
+# Fonctionnement attendu
+
+- Page d'accueil : affichage de France Travail et Ille-et-Vilaine, puis choix de deux explorateurs.
+- Après sélection du personnage : vidéo d'introduction du guide.
+- Le dialogue s'affiche sous forme de texte interactif, avec possibilité d'avancer ou de passer.
+- Une alerte propose de fermer ou de démarrer l'aventure.
+- Après avoir démarré l'aventure, l'application passe à l'écran de jeu.
+- Sur la carte : choix d'un intervenant à qui parler, système de badge, possibilité de changer de personnage ou de retourner à l'accueil.
+- Cliquer sur un intervenant lance un dialogue, puis un quiz et ensuite une vidéo.
+- Quand une quête est validée : le joueur reçoit de l'XP et un badge, l'intervenant est marqué comme accompli.
+- Quand toutes les quêtes sont accomplies : apparition d'un écran de fin.

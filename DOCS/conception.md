@@ -1,19 +1,19 @@
-# projet
--    nom : route du rome
-    
--    contexte : La Route du Rome est un jeu sérieux pour France Travail (35) qui fait découvrir les métiers du département via un guide, une carte interactive et des quiz vidéo, avec système d'XP et de badges. Fonctionnelle et validée sur le fond par le commanditaire, l'application reste codée de façon artisanale (deux pages HTML, CSS/JS en ligne, sans structure ni tests), ce qui rend sa maintenance difficile.
-    
--    objectifs : Le commanditaire veut la même application, mais rendue professionnelle : maintenable, évolutive, sécurisée et testable, utilisable sur mobile et tablette, et installable comme une application (PWA).
-    → Important : aucune nouvelle fonctionnalité, aucun changement visible pour l'utilisateur. Le résultat doit se comporter exactement comme l'application actuelle.
+# Projet
 
-# docs de conceptions
+- Nom : Route du Rome
+- Contexte : La Route du Rome est un jeu sérieux pour France Travail (35) qui fait découvrir les métiers du département via un guide, une carte interactive et des quiz vidéo, avec un système d'XP et de badges.
+- Objectif : conserver le fonctionnement validé par le commanditaire tout en refondant techniquement l'application pour la rendre professionnelle.
 
-- ./arborescence.md
-- ./commentcafonctionne.md
+> Important : aucune nouvelle fonctionnalité et aucun changement visible pour l'utilisateur final. Le comportement doit rester strictement identique à l'existant.
 
-# analyse des problèmes
+## Documentation de conception
 
-- tout le site as été fait par ia donc va falloir tour refactoriser
-- on vas changer le site pour tourner avec npm et vite pour avoir des moyen de tester
-- on vas faire du typescript pour pouvoir typer nos objet sans trop prendre de place pour une appli lègere
-- on vas faire tout sans base de donnée donc le backend est pas necessaire
+- `arborescence.md`
+- `commentcafonctionne.md`
+
+## Analyse des problèmes
+
+- Le code existant a été généré de manière artisanale et nécessite une refactorisation complète.
+- Le projet doit être migré vers `npm` et `Vite` pour disposer d'un outillage moderne et de tests.
+- La solution doit utiliser TypeScript pour typer les objets métier tout en restant légère.
+- Il n'y a pas besoin de base de données : les données restent statiques et le backend n'est pas nécessaire.
