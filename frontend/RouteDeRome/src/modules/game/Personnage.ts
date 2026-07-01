@@ -1,5 +1,5 @@
 import { Quiz } from './Quiz'
-import { Position } from './types/Position'
+import type { Position } from './types/Position'
 
 export interface PersonnageProps {
   id: string;

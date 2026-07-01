@@ -1,5 +1,5 @@
 import { Personnage } from '../game/Personnage'
-import { Position } from '../game/types/Position'
+import type { Position } from '../game/types/Position'
 
 export interface CarteInterface {
   afficherMarqueur(personnage: Personnage): void

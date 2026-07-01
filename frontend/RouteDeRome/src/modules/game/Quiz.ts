@@ -16,6 +16,6 @@ export class Quiz {
 
   public verifierReponse(questionId: string, reponseId: string): boolean {
     const question = this.questions.find((item) => item.id === questionId)
-    return question?.bonneReponseId === reponseId ?? false
+    return question?.bonneReponseId === reponseId
   }
 }

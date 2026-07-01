@@ -1,4 +1,4 @@
-import { EtatQuete } from './types/EtatQuete'
+import type { EtatQuete } from './types/EtatQuete'
 
 export interface QueteProps {
   id: string;
@@ -6,11 +6,14 @@ export interface QueteProps {
   objectif: string;
 }
 
+const ETAT_NON_COMMENCEE: EtatQuete = 'NON_COMMENCEE'
+const ETAT_ACCOMPLIE: EtatQuete = 'ACCOMPLIE'
+
 export class Quete {
   public readonly id: string
   public readonly personnageId: string
   public readonly objectif: string
-  private etat: EtatQuete = EtatQuete.NON_COMMENCEE
+  private etat: EtatQuete = ETAT_NON_COMMENCEE
 
   constructor(props: QueteProps) {
     this.id = props.id
@@ -19,10 +22,10 @@ export class Quete {
   }
 
   public valider(): void {
-    this.etat = EtatQuete.ACCOMPLIE
+    this.etat = ETAT_ACCOMPLIE
   }
 
   public estAccomplie(): boolean {
-    return this.etat === EtatQuete.ACCOMPLIE
+    return this.etat === ETAT_ACCOMPLIE
   }
 }

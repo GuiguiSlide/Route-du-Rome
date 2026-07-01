@@ -1,5 +1,1 @@
-export enum EtatQuete {
-  NON_COMMENCEE = 'NON_COMMENCEE',
-  EN_COURS = 'EN_COURS',
-  ACCOMPLIE = 'ACCOMPLIE',
-}
+export type EtatQuete = 'NON_COMMENCEE' | 'EN_COURS' | 'ACCOMPLIE'
