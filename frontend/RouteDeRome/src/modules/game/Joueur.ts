@@ -1,29 +1,66 @@
-import { Badge } from './Badge'
-
-export interface JoueurState {
-  xp: number;
-  niveau: number;
-  badges: Badge[];
-  personnageChoisiId: string | null;
-}
+import { Badge } from "./Badge";
+import { CarnetDeBord } from "./CarnetDeBord";
+import { Personnage } from "./Personnage";
+import { Position } from "./types/Position";
 
 export class Joueur {
-  private state: JoueurState = {
-    xp: 0,
-    niveau: 1,
-    badges: [],
-    personnageChoisiId: null,
+  private xp = 0;
+  private niveau = 1;
+  private readonly badges: Badge[] = [];
+  private personnageChoisi: Personnage | null = null;
+  private readonly carnetDeBord: CarnetDeBord;
+  private position: Position | null = null;
+
+  constructor(carnetDeBord: CarnetDeBord) {
+    this.carnetDeBord = carnetDeBord;
   }
 
-  public gagnerXp(valeur: number): void {
-    this.state.xp += valeur
+  gagnerXp(montant: number): void {
+    if (montant < 0) {
+      throw new Error("Le montant d'XP ne peut pas être négatif");
+    }
+    this.xp += montant;
+    this.recalculerNiveau();
   }
 
-  public ajouterBadge(badge: Badge): void {
-    this.state.badges.push(badge)
+  private recalculerNiveau(): void {
+    this.niveau = Math.floor(this.xp / 100) + 1;
   }
 
-  public getState(): JoueurState {
-    return { ...this.state, badges: [...this.state.badges] }
+  ajouterBadge(badge: Badge): void {
+    if (this.badges.some((b) => b.id === badge.id)) return;
+    this.badges.push(badge);
+  }
+
+  changerPersonnage(personnage: Personnage): void {
+    this.personnageChoisi = personnage;
+  }
+
+  deplacerVers(position: Position): void {
+    this.position = position;
+  }
+
+  getPosition(): Position | null {
+    return this.position;
+  }
+
+  getXp(): number {
+    return this.xp;
+  }
+
+  getNiveau(): number {
+    return this.niveau;
+  }
+
+  getBadges(): readonly Badge[] {
+    return [...this.badges];
+  }
+
+  getPersonnageChoisi(): Personnage | null {
+    return this.personnageChoisi;
+  }
+
+  getCarnetDeBord(): CarnetDeBord {
+    return this.carnetDeBord;
   }
 }

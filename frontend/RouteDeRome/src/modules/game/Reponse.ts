@@ -1,14 +1,9 @@
-export interface ReponseProps {
-  id: string;
-  texte: string;
-}
-
 export class Reponse {
-  public readonly id: string
-  public readonly texte: string
+  readonly id: string;
+  readonly texte: string;
 
-  constructor(props: ReponseProps) {
-    this.id = props.id
-    this.texte = props.texte
+  constructor(id: string, texte: string) {
+    this.id = id;
+    this.texte = texte;
   }
 }

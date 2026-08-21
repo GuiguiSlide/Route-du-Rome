@@ -1,31 +1,33 @@
-import type { EtatQuete } from './types/EtatQuete'
-
-export interface QueteProps {
-  id: string;
-  personnageId: string;
-  objectif: string;
-}
-
-const ETAT_NON_COMMENCEE: EtatQuete = 'NON_COMMENCEE'
-const ETAT_ACCOMPLIE: EtatQuete = 'ACCOMPLIE'
+import { EtatQuete } from "./types/EtatQuete";
+import { Personnage } from "./Personnage";
 
 export class Quete {
-  public readonly id: string
-  public readonly personnageId: string
-  public readonly objectif: string
-  private etat: EtatQuete = ETAT_NON_COMMENCEE
+  readonly id: string;
+  readonly personnage: Personnage;
+  readonly objectif: string;
+  private etat: EtatQuete = EtatQuete.NON_COMMENCEE;
 
-  constructor(props: QueteProps) {
-    this.id = props.id
-    this.personnageId = props.personnageId
-    this.objectif = props.objectif
+  constructor(id: string, personnage: Personnage, objectif: string) {
+    this.id = id;
+    this.personnage = personnage;
+    this.objectif = objectif;
   }
 
-  public valider(): void {
-    this.etat = ETAT_ACCOMPLIE
+  commencer(): void {
+    if (this.etat === EtatQuete.NON_COMMENCEE) {
+      this.etat = EtatQuete.EN_COURS;
+    }
   }
 
-  public estAccomplie(): boolean {
-    return this.etat === ETAT_ACCOMPLIE
+  valider(): void {
+    this.etat = EtatQuete.ACCOMPLIE;
+  }
+
+  estAccomplie(): boolean {
+    return this.etat === EtatQuete.ACCOMPLIE;
+  }
+
+  getEtat(): EtatQuete {
+    return this.etat;
   }
 }

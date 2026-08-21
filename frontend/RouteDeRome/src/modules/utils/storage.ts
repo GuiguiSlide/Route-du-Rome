@@ -1,8 +1,17 @@
-export function sauvegarderProgression(cle: string, valeur: unknown): void {
-  localStorage.setItem(cle, JSON.stringify(valeur))
+const HERO_STORAGE_KEY = "rdr_hero";
+
+export function saveSelectedHero(key: string): void {
+  try {
+    localStorage.setItem(HERO_STORAGE_KEY, key);
+  } catch {
+    // stockage indisponible (navigation privée, quota...) : on ignore
+  }
 }
 
-export function chargerProgression<T>(cle: string): T | null {
-  const item = localStorage.getItem(cle)
-  return item ? (JSON.parse(item) as T) : null
+export function getSelectedHero(): string | null {
+  try {
+    return localStorage.getItem(HERO_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }

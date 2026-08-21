@@ -1,17 +1,27 @@
 export class CarnetDeBord {
-  private metiersDecouverts: string[] = []
+  private readonly metiersDecouverts: string[] = [];
+  private readonly totalMetiers: number;
 
-  public ajouterMetier(metier: string): void {
+  constructor(totalMetiers: number) {
+    this.totalMetiers = totalMetiers;
+  }
+
+  ajouterMetier(metier: string): void {
     if (!this.metiersDecouverts.includes(metier)) {
-      this.metiersDecouverts.push(metier)
+      this.metiersDecouverts.push(metier);
     }
   }
 
-  public getProgression(): number {
-    return this.metiersDecouverts.length
+  getMetiersDecouverts(): readonly string[] {
+    return [...this.metiersDecouverts];
   }
 
-  public getMetiers(): string[] {
-    return [...this.metiersDecouverts]
+  getProgression(): number {
+    if (this.totalMetiers === 0) return 0;
+    return this.metiersDecouverts.length / this.totalMetiers;
+  }
+
+  aDecouvert(metier: string): boolean {
+    return this.metiersDecouverts.includes(metier);
   }
 }

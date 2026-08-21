@@ -1,16 +1,144 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>La Route du Rome</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-sA+1xqccg2COjC6QeM/5cSJtELpH2UE5P6S+Hk8WIzTqG8Pjh3+CBLYZ2pTF3Q9D3jZdxWfoLCJ9SoRlbpLJ5xg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="app"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-oH3v+K6X/9z+1l/lBj9Q+kK0nE6DN5uR5N3EZRm4j+T3b7m+KwU+uSIZpjYxazC6RKb3U4Bbg9buG4m9zPSm0w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Route du Rome</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Nunito:wght@400;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/manifest.json">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <meta name="theme-color" content="#1D1E3C">
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+
+<body>
+  <div id="flash"></div>
+
+  <audio id="bg-music" src="assets/sounds/theme.mp3" loop preload="auto"></audio>
+  <audio id="waves" src="assets/sounds/waves.mp3" loop preload="auto"></audio>
+  <audio id="seagull" src="assets/sounds/mouettes.mp3" preload="auto"></audio>
+
+  <!-- ECRAN CHOIX PERSONNAGE -->
+  <div id="screen-pick">
+    <div class="ft-badge">France Travail · Ille-et-Vilaine</div>
+    <div class="game-title">LA ROUTE<br><span>DU ROME</span></div>
+    <div class="game-sub">Découvre les métiers du 35</div>
+    <div class="cards-row">
+      <div class="hero-card" id="card-elio">
+        <div class="card-photo"><img id="img-elio" src="assets/img/ElioPP.png" alt="Élio"></div>
+        <div class="card-info">
+          <div class="card-name">Élio</div>
+          <div class="card-role">Explorateur · Niveau 1</div>
+          <div class="card-tags">
+            <span class="card-tag">Dynamique</span>
+            <span class="card-tag">Curieux</span>
+            <span class="card-tag">Bavard</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-card" id="card-elia">
+        <div class="card-photo"><img id="img-elia" src="assets/img/EliaPP.png" alt="Élia"></div>
+        <div class="card-info">
+          <div class="card-name">Élia</div>
+          <div class="card-role">Exploratrice · Niveau 1</div>
+          <div class="card-tags">
+            <span class="card-tag">Déterminée</span>
+            <span class="card-tag">Précise</span>
+            <span class="card-tag">Courageuse</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pick-hint">Clique sur ton personnage pour commencer</div>
+  </div>
+
+  <!-- ECRAN JEU / INTRO -->
+  <div id="screen-game">
+    <div id="intro-map"></div>
+
+    <div id="map-overlay">
+      <div class="mo-title">Saint-Malo &amp; Alentours</div>
+      <div class="mo-badge">France Travail · 35</div>
+    </div>
+
+    <div id="vid-wrap">
+      <video id="the-video" playsinline loop></video>
+      <div id="skip-btn"><button id="skip-btn-action">Passer</button></div>
+    </div>
+
+    <div id="dlg">
+      <div class="dlg-head">
+        <img class="dlg-portrait" id="dlg-portrait" src="assets/img/ElioPP.png" alt="">
+        <div class="dlg-info">
+          <div class="dlg-nname" id="dlg-nname">Élio</div>
+          <div class="dlg-nrole" id="dlg-nrole">Explorateur · France Travail 35</div>
+        </div>
+        <div class="dlg-tag">La Route du Rome</div>
+        <div class="dlg-dots" id="dlg-dots"></div>
+        <button class="dlg-x" id="dlg-close">&times;</button>
+      </div>
+      <div class="dlg-body">
+        <div id="dlg-txt"></div>
+      </div>
+      <div class="dlg-foot">
+        <div class="dlg-hint"><span class="dkey">Espace</span>&nbsp;·&nbsp;<span class="dkey">Clic</span>&nbsp;pour
+          continuer</div>
+      </div>
+    </div>
+
+    <div id="hero-popup">
+      <div class="pop-card">
+        <div class="pop-head">
+          <button class="pop-close" id="pop-close">&times;</button>
+          <img class="pop-portrait" id="pop-portrait" src="assets/img/ElioPP.png" alt="">
+          <div>
+            <h2 id="pop-name">Élio</h2>
+            <p id="pop-role">Explorateur France Travail · Niveau 1</p>
+          </div>
+        </div>
+        <div class="pop-body">
+          <div class="pills">
+            <div class="pill pv">Explorateur</div>
+            <div class="pill py">Niveau 1</div>
+            <div class="pill pb">0 / 9 métiers</div>
+          </div>
+          <div class="pop-bio" id="pop-bio">Bienvenue dans La Route du Rome !</div>
+          <div class="pop-xp-lbl">Expérience <span>0 / 200 XP</span></div>
+          <div class="xp-track">
+            <div class="xp-bar-inner" id="pop-xp"></div>
+          </div>
+          <div class="pop-btns">
+            <button class="btn btn-g" id="pop-btn-close">Fermer</button>
+            <button class="btn btn-v" id="pop-btn-start">Démarrer l'aventure !</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ECRAN CARTE DE JEU -->
+  <div id="screen-map">
+    <div id="quiz">
+      <div class="quiz-card">
+        <div class="quiz-head">
+          <div class="quiz-progress" id="quiz-progress"></div>
+          <button class="dlg-x" id="quiz-close">&times;</button>
+        </div>
+        <div class="quiz-body">
+          <div id="quiz-question"></div>
+          <div id="quiz-reponses"></div>
+        </div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+  <script type="module" src="./src/main.ts"></script>
+</body>
+
 </html>

@@ -1,25 +1,19 @@
-export interface Reponse {
-  id: string;
-  texte: string;
-}
-
-export interface QuestionProps {
-  id: string;
-  texte: string;
-  reponses: Reponse[];
-  bonneReponseId: string;
-}
+import { Reponse } from "./Reponse";
 
 export class Question {
-  public readonly id: string
-  public readonly texte: string
-  public readonly reponses: Reponse[]
-  public readonly bonneReponseId: string
+  readonly id: string;
+  readonly texte: string;
+  readonly reponses: Reponse[];
+  readonly bonneReponseId: string;
 
-  constructor(props: QuestionProps) {
-    this.id = props.id
-    this.texte = props.texte
-    this.reponses = props.reponses
-    this.bonneReponseId = props.bonneReponseId
+  constructor(id: string, texte: string, reponses: Reponse[], bonneReponseId: string) {
+    this.id = id;
+    this.texte = texte;
+    this.reponses = reponses;
+    this.bonneReponseId = bonneReponseId;
+  }
+
+  estCorrecte(reponseId: string): boolean {
+    return reponseId === this.bonneReponseId;
   }
 }
