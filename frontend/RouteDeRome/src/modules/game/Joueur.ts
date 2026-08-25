@@ -15,6 +15,7 @@ export class Joueur {
     this.carnetDeBord = carnetDeBord;
   }
 
+  // Le niveau est dérivé de l'XP : il n'est jamais modifié directement par l'interface.
   gagnerXp(montant: number): void {
     if (montant < 0) {
       throw new Error("Le montant d'XP ne peut pas être négatif");
@@ -27,6 +28,7 @@ export class Joueur {
     this.niveau = Math.floor(this.xp / 100) + 1;
   }
 
+  // Le tableau conserve l'ordre d'obtention tout en empêchant les doublons par identifiant.
   ajouterBadge(badge: Badge): void {
     if (this.badges.some((b) => b.id === badge.id)) return;
     this.badges.push(badge);

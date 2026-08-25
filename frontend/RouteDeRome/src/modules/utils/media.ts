@@ -1,5 +1,6 @@
 let seagullTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Les médias sont lancés après un clic utilisateur pour respecter les règles d'autoplay.
 export function playBackgroundAudio(): void {
   const music = document.getElementById("bg-music") as HTMLAudioElement | null;
   const waves = document.getElementById("waves") as HTMLAudioElement | null;
@@ -15,6 +16,7 @@ export function playBackgroundAudio(): void {
   }
 }
 
+// Programme un cri court et aléatoire, puis recommence après une nouvelle attente.
 export function startSeagulls(): void {
   const seagull = document.getElementById("seagull") as HTMLAudioElement | null;
   if (!seagull) return;

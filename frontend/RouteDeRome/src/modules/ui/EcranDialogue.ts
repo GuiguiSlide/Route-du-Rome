@@ -25,6 +25,7 @@ export function startDialogue(lines: string[], onEnd: OnDialogueEnd): void {
   typeLine(dlgLines[0]);
 }
 
+// Un clic termine d'abord l'animation de frappe, puis avance réellement la conversation.
 export function advanceDialogue(): void {
   const el = document.getElementById("dlg-txt");
   if (!el) return;
@@ -51,6 +52,7 @@ export function advanceDialogue(): void {
   typeLine(dlgLines[dlgIdx]);
 }
 
+// Le timer est conservé au niveau du module pour garantir une seule frappe active.
 function typeLine(txt: string): void {
   if (dlgTimer) clearInterval(dlgTimer);
   const el = document.getElementById("dlg-txt");

@@ -4,6 +4,7 @@ import { advanceDialogue, closeDialogue } from "./modules/ui/EcranDialogue";
 import { closeHeroPopup } from "./modules/ui/composants/HeroPopup";
 import { EcranCarte } from "./modules/ui/EcranCarte";
 import { bindQuizControls } from "./modules/ui/EcranQuiz";
+import { bindCarnetControls } from "./modules/ui/EcranCarnet";
 
 function bindDialogueControls(): void {
   const dlg = document.getElementById("dlg");
@@ -27,6 +28,7 @@ function bindDialogueControls(): void {
   });
 }
 
+// La popup du héros est le pont entre la sélection et la création de la carte.
 function bindHeroPopupControls(): void {
   document.getElementById("pop-close")?.addEventListener("click", closeHeroPopup);
   document.getElementById("pop-btn-close")?.addEventListener("click", closeHeroPopup);
@@ -37,12 +39,14 @@ function bindHeroPopupControls(): void {
   });
 }
 
+// Tous les écouteurs sont enregistrés une seule fois au chargement du module.
 function init(): void {
   bindHeroCards();
   bindVideoControls();
   bindDialogueControls();
   bindHeroPopupControls();
   bindQuizControls();
+  bindCarnetControls();
 }
 
 init();

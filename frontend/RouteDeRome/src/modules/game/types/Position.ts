@@ -7,6 +7,7 @@ export class Position {
     this.lng = lng;
   }
 
+  // Formule de Haversine : distance réelle à la surface de la Terre, renvoyée en mètres.
   distanceTo(autre: Position): number {
     const R = 6371000;
     const dLat = this.toRad(autre.lat - this.lat);

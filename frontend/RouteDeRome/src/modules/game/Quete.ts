@@ -13,12 +13,14 @@ export class Quete {
     this.objectif = objectif;
   }
 
+  // Une quête ne passe à EN_COURS qu'au premier dialogue avec son personnage.
   commencer(): void {
     if (this.etat === EtatQuete.NON_COMMENCEE) {
       this.etat = EtatQuete.EN_COURS;
     }
   }
 
+  // La validation est appelée par Jeu après la fin du quiz.
   valider(): void {
     this.etat = EtatQuete.ACCOMPLIE;
   }

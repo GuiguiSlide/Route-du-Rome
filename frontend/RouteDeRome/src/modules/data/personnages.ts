@@ -32,6 +32,8 @@ export function chargerContenus(characters: Character[]): PersonnageContenu[] {
     dialogueIntro: character.dialogues.intro,
   }));
 }
+
+// Prépare uniquement les dialogues nécessaires à EcranCarte, sans mélanger les données de présentation.
 export function chargerPresentations(characters: Character[]): PersonnagePresentation[] {
   return characters
     .filter((character) => character.location !== null)
@@ -60,6 +62,7 @@ export function getPlayableHeroes(): Character[] {
   return CHARACTERS.filter((c) => c.isPlayable);
 }
 
+// La sélection appelle cette fonction pour empêcher de choisir un professionnel comme héros.
 export function getHeroById(id: string): Character | undefined {
   return CHARACTERS.find((c) => c.id === id && c.isPlayable);
 }
@@ -69,6 +72,7 @@ export function getMapCharacters(): Character[] {
   return CHARACTERS.filter((c) => c.location !== null);
 }
 
+// Sert aux écrans qui veulent retrouver un personnage, qu'il soit héros ou professionnel.
 export function getCharacterById(id: string): Character | undefined {
   return CHARACTERS.find((c) => c.id === id);
 }

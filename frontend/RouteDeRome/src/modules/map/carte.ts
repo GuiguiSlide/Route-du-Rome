@@ -13,11 +13,13 @@ export class Carte implements ICarte {
   private readonly clicCallbacks: Array<(position: Position) => void> = [];
 
   constructor(presentations: PersonnagePresentation[]) {
+    // La Map permet de retrouver instantanément l'icône et la couleur par identifiant.
     this.presentations = new Map(
       presentations.map((presentation) => [presentation.personnageId, presentation])
     );
   }
 
+  // Leaflet est initialisé une seule fois pour éviter de doubler les tuiles et les événements.
   initialiser(containerId: string): void {
     if (this.map) return;
 
@@ -44,10 +46,12 @@ export class Carte implements ICarte {
     this.map?.invalidateSize();
   }
 
+  // Le callback sera appelé par Leaflet à chaque clic sur la carte.
   onClicCarte(callback: (position: Position) => void): void {
     this.clicCallbacks.push(callback);
   }
 
+  // Le marqueur joueur est créé au premier déplacement puis simplement repositionné.
   afficherJoueur(position: Position): void {
     if (!this.map) return;
 
@@ -65,6 +69,7 @@ export class Carte implements ICarte {
     this.joueurMarker = L.marker([position.lat, position.lng], { icon }).addTo(this.map);
   }
 
+  // Transforme un professionnel métier en marqueur visuel avec son icône et son nom.
   afficherMarqueur(personnage: Personnage): void {
     if (!this.map || !personnage.position) return;
 
@@ -81,6 +86,7 @@ export class Carte implements ICarte {
     this.map?.setView([position.lat, position.lng], this.map.getZoom());
   }
 
+  // La coche verte signale que la quête du professionnel est déjà terminée.
   marquerAccompli(personnageId: string): void {
     const marker = this.markers.get(personnageId);
     const presentation = this.presentations.get(personnageId);

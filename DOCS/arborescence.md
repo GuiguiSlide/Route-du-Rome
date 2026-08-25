@@ -1,64 +1,98 @@
-# Arborescence
+# Arborescence du projet
 
-La structure retenue combine la modularité opérationnelle de `src/modules/` et la séparation logique en couches.
-
+```text
 Route-du-Rome/
-├── frontend/RouteDeRome/
-│   ├── public/                        # actifs statiques et fichiers PWA
-│   ├── src/
-│   │   ├── main.ts                   # point d'entrée de l'application
-│   │   ├── style.css                 # styles globaux
-│   │   ├── assets/
-│   │   │   ├── img/
-│   │   │   ├── sounds/
-│   │   │   └── videos/
-│   │   ├── modules/
-│   │   │   ├── game/                 # logique métier et progression du jeu
-│   │   │   │   ├── Jeu.ts
-│   │   │   │   ├── Joueur.ts
-│   │   │   │   ├── Personnage.ts
-│   │   │   │   ├── Quete.ts
-│   │   │   │   ├── Quiz.ts
-│   │   │   │   ├── Question.ts
-│   │   │   │   ├── Reponse.ts
-│   │   │   │   ├── Badge.ts
-│   │   │   │   ├── CarnetDeBord.ts
-│   │   │   │   └── types/
-│   │   │   │       ├── EtatQuete.ts
-│   │   │   │       └── Position.ts
-│   │   │   ├── map/                  # carte interactive et sélection des intervenants
-│   │   │   │   ├── carte.ts
-│   │   │   │   ├── locations.ts
-│   │   │   │   └── npc.ts
-│   │   │   ├── ui/                   # écrans et composants DOM
-│   │   │   │   ├── EcranSelection.ts
-│   │   │   │   ├── EcranCarte.ts
-│   │   │   │   ├── EcranDialogue.ts
-│   │   │   │   ├── EcranFin.ts
-│   │   │   │   └── composants/
-│   │   │   ├── data/                 # données statiques du jeu
-│   │   │   │   ├── personnages.ts
-│   │   │   │   ├── quizzes.ts
-│   │   │   │   └── dialogues.ts
-│   │   │   └── utils/                # utilitaires partagés
-│   │   │       ├── storage.ts
-│   │   │       ├── events.ts
-│   │   │       ├── media.ts
-│   │   │       └── accessibility.ts
-│   │   └── tests/
-│   │       ├── unit/
-│   │       └── integration/
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── .gitignore
+├── README.md
 ├── DOCS/
-├── old/
-└── README.md
+│   ├── README.md
+│   ├── arborescence.md
+│   ├── architecture.md
+│   ├── commentcafonctionne.md
+│   ├── conception.md
+│   ├── devlog.md
+│   ├── objectifs_et_contraintes.md
+│   ├── reste_a_faire.md
+│   ├── mcd/
+│   ├── mld/
+│   └── uml/
+├── frontend/
+│   └── RouteDeRome/
+│       ├── index.html
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── public/
+│       │   └── assets/
+│       │       ├── img/
+│       │       ├── sounds/
+│       │       └── videos/
+│       └── src/
+│           ├── main.ts
+│           ├── style.css
+│           ├── assets/
+│           │   ├── img/
+│           │   ├── sounds/
+│           │   └── videos/
+│           ├── modules/
+│           │   ├── data/
+│           │   │   ├── personnages.json
+│           │   │   ├── personnages.ts
+│           │   │   ├── dialogues.ts
+│           │   │   └── quizzes.ts
+│           │   ├── game/
+│           │   │   ├── Jeu.ts
+│           │   │   ├── Joueur.ts
+│           │   │   ├── Personnage.ts
+│           │   │   ├── PersonnageFactory.ts
+│           │   │   ├── Quete.ts
+│           │   │   ├── Quiz.ts
+│           │   │   ├── Question.ts
+│           │   │   ├── Reponse.ts
+│           │   │   ├── Badge.ts
+│           │   │   ├── CarnetDeBord.ts
+│           │   │   └── types/
+│           │   │       ├── EtatQuete.ts
+│           │   │       └── Position.ts
+│           │   ├── map/
+│           │   │   ├── Carte.ts
+│           │   │   ├── ICarte.ts
+│           │   │   ├── locations.ts
+│           │   │   └── npc.ts
+│           │   ├── ui/
+│           │   │   ├── EcranSelection.ts
+│           │   │   ├── EcranCarte.ts
+│           │   │   ├── EcranDialogue.ts
+│           │   │   ├── EcranQuiz.ts
+│           │   │   ├── EcranCarnet.ts
+│           │   │   ├── EcranFin.ts
+│           │   │   └── composants/
+│           │   │       ├── Bouton.ts
+│           │   │       ├── HeroPopup.ts
+│           │   │       └── index.ts
+│           │   └── utils/
+│           │       ├── media.ts
+│           │       ├── storage.ts
+│           │       ├── events.ts
+│           │       ├── accessibility.ts
+│           │       ├── IAudio.ts
+│           │       └── IVideo.ts
+│           └── tests/
+│               ├── unit/game.test.ts
+│               └── integration/ui.test.ts
+└── old/
+    └── ancienne version HTML/CSS/JavaScript
+```
 
-## Notes
-- `src/modules/game/` représente la couche domaine métier.
-- `src/modules/map/` et `src/modules/utils/` supportent les services externes et helpers.
-- `src/modules/ui/` relie le DOM au jeu sans faire reposer la logique métier sur le navigateur.
-- `src/modules/data/` contient les données statiques validées par le commanditaire.
+## Rôle des dossiers
+
+- `DOCS/` : documentation fonctionnelle, technique et conception.
+- `frontend/RouteDeRome/src/modules/data/` : données statiques et leurs types.
+- `frontend/RouteDeRome/src/modules/game/` : domaine métier indépendant du DOM.
+- `frontend/RouteDeRome/src/modules/map/` : adaptateur Leaflet et marqueurs.
+- `frontend/RouteDeRome/src/modules/ui/` : écrans qui manipulent le DOM.
+- `frontend/RouteDeRome/src/modules/utils/` : services transverses.
+- `frontend/RouteDeRome/src/tests/` : tests unitaires et d'intégration.
+- `old/` : ancienne implémentation conservée comme référence, non chargée par Vite.
+
+## Chemin actif
+
+Le chemin utilisé par l'application est `index.html` → `main.ts` → `EcranSelection`/`EcranCarte` → domaine métier et `personnages.json`. Les fichiers de données et modèles signalés comme non utilisés dans `architecture.md` sont des restes de conception ou de migration.

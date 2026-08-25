@@ -10,12 +10,15 @@ import { Quete } from "../game/Quete";
 import type { Position } from "../game/types/Position";
 import { startDialogue, closeDialogue } from "./EcranDialogue";
 import { startQuiz } from "./EcranQuiz";
+import { afficherCarnet } from "./EcranCarnet";
+import { EcranFin } from "./EcranFin";
 
 export class EcranCarte {
   private carte: Carte | null = null;
   private jeu: Jeu | null = null;
   private contenus: readonly PersonnageContenu[] = [];
 
+  // Construit la partie complète et relie la carte aux callbacks de rencontre.
   public afficher(): void {
     document.getElementById("screen-game")?.classList.remove("visible");
     document.getElementById("screen-map")?.classList.add("visible");
@@ -32,6 +35,9 @@ export class EcranCarte {
       (personnage) => new Quete(`quete-${personnage.id}`, personnage, personnage.metier)
     );
     this.jeu = new Jeu(joueur, personnages, quetes);
+    document.addEventListener("ouvrir-carnet", () => {
+      if (this.jeu) afficherCarnet(this.jeu.getJoueur());
+    });
 
     this.carte = new Carte(presentations);
     this.carte.initialiser("map");
@@ -42,6 +48,7 @@ export class EcranCarte {
     this.carte.onClicCarte((position) => this.gererClicCarte(position));
   }
 
+  // Un clic devient une rencontre seulement si le joueur est dans le rayon métier défini par Jeu.
   private gererClicCarte(position: Position): void {
     if (!this.jeu || !this.carte) return;
 
@@ -54,6 +61,16 @@ export class EcranCarte {
     const quiz = this.jeu.parlerA(personnage.id);
     const contenu = this.contenus.find((c) => c.personnageId === personnage.id);
     const lignes = contenu?.dialogueIntro ?? [];
+    const portrait = personnagesData.find((character) => character.id === personnage.id)?.portrait;
+    const dialoguePortrait = document.getElementById("dlg-portrait") as HTMLImageElement | null;
+    if (dialoguePortrait && portrait) {
+      dialoguePortrait.src = portrait;
+      dialoguePortrait.alt = personnage.nom;
+    }
+    const dialogueName = document.getElementById("dlg-nname");
+    const dialogueRole = document.getElementById("dlg-nrole");
+    if (dialogueName) dialogueName.textContent = personnage.nom;
+    if (dialogueRole) dialogueRole.textContent = personnage.metier;
 
     this.afficherVideoRencontre(personnage.videoIntro);
 
@@ -71,12 +88,19 @@ export class EcranCarte {
     });
   }
 
+  // Le callback du quiz déclenche les récompenses, puis éventuellement la fin globale.
   private terminerRencontre(personnageId: string): void {
     this.jeu?.terminerRencontre(personnageId);
     this.carte?.marquerAccompli(personnageId);
     this.masquerVideoRencontre();
+    const level = document.getElementById("map-level");
+    if (level && this.jeu) level.textContent = `Niveau ${this.jeu.getJoueur().getNiveau()}`;
+    if (this.jeu?.estTermine()) {
+      new EcranFin().afficher(this.jeu.getJoueur());
+    }
   }
 
+  // La vidéo est une couche DOM au-dessus de la carte; le dialogue reste au premier plan.
   private afficherVideoRencontre(videoUrl: string | null): void {
     const wrap = document.getElementById("encounter-video-wrap");
     const video = document.getElementById("encounter-video") as HTMLVideoElement | null;

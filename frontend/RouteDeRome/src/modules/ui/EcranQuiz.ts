@@ -8,6 +8,7 @@ let quizCourant: Quiz | null = null;
 let onQuestionVueCallback: OnQuestionVue | null = null;
 let onEndCallback: OnQuizEnd | null = null;
 
+// Ces callbacks relient l'interface aux objets métier sans faire entrer le DOM dans le domaine.
 export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQuizEnd): void {
   quizCourant = quiz;
   onQuestionVueCallback = onQuestionVue;
@@ -15,7 +16,10 @@ export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQui
 
   document.getElementById("dlg-hint")?.style.setProperty("display", "none");
   const continueBtn = document.getElementById("dlg-quiz-continue");
-  if (continueBtn) continueBtn.style.display = "inline-block";
+  if (continueBtn) {
+    continueBtn.style.display = "inline-block";
+    (continueBtn as HTMLButtonElement).disabled = true;
+  }
 
   const replyEl = document.getElementById("dlg-quiz-reply");
   if (replyEl) {
@@ -27,6 +31,7 @@ export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQui
   document.getElementById("dlg-quiz-choices")?.classList.add("show");
 }
 
+// Les boutons sont reconstruits à chaque quiz pour éviter de conserver ceux d'une ancienne rencontre.
 function renderChoices(): void {
   if (!quizCourant) return;
   const container = document.getElementById("dlg-quiz-choices");
@@ -43,6 +48,7 @@ function renderChoices(): void {
   });
 }
 
+// Une réponse remplace le texte du dialogue; la question est ensuite mémorisée dans le Quiz.
 function choisirQuestion(questionId: string, reponse: string, bouton: HTMLButtonElement): void {
   document.querySelectorAll<HTMLButtonElement>(".dlg-quiz-choice").forEach((btn) => {
     btn.classList.remove("selected");
@@ -59,9 +65,17 @@ function choisirQuestion(questionId: string, reponse: string, bouton: HTMLButton
   }
 
   onQuestionVueCallback?.(questionId);
+
+  if (quizCourant?.estComplet()) {
+    const continueBtn = document.getElementById("dlg-quiz-continue") as HTMLButtonElement | null;
+    if (continueBtn) continueBtn.disabled = false;
+  }
 }
 
+// La validation est refusée tant que le Quiz ne connaît pas les trois questions consultées.
 function terminerQuiz(): void {
+  if (!quizCourant?.estComplet()) return;
+
   document.getElementById("dlg-quiz-choices")?.classList.remove("show");
   document.getElementById("dlg-hint")?.style.setProperty("display", "flex");
   const continueBtn = document.getElementById("dlg-quiz-continue");

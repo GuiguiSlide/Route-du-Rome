@@ -131,10 +131,47 @@
   <div id="screen-map">
     <div id="map"></div>
 
+    <div id="map-hud">
+      <span id="map-level">Niveau 1</span>
+      <button id="carnet-btn" type="button">📓 Carnet</button>
+    </div>
+
     <!-- Vidéo de rencontre : placée au-dessus de la carte et sous le dialogue -->
     <div id="encounter-video-wrap" aria-hidden="true">
       <video id="encounter-video" playsinline preload="auto"></video>
     </div>
+  </div>
+
+  <div id="carnet-overlay" role="dialog" aria-modal="true" aria-labelledby="carnet-title">
+    <section id="carnet-panel">
+      <header class="overlay-header">
+        <div>
+          <p class="overlay-kicker">Progression</p>
+          <h2 id="carnet-title">Mon carnet de bord</h2>
+        </div>
+        <button id="carnet-close" type="button" aria-label="Fermer le carnet">&times;</button>
+      </header>
+      <div class="carnet-stats">
+        <div><strong id="carnet-level">Niveau 1</strong><span>Niveau</span></div>
+        <div><strong id="carnet-xp">0 XP</strong><span>Expérience</span></div>
+        <div><strong id="carnet-jobs">0 / 9 métiers</strong><span>Métiers</span></div>
+      </div>
+      <h3>Badges collectés</h3>
+      <div id="carnet-badges"></div>
+    </section>
+  </div>
+
+  <div id="end-overlay" role="dialog" aria-modal="true" aria-labelledby="end-title">
+    <section id="end-panel">
+      <p class="overlay-kicker">Aventure terminée</p>
+      <h2 id="end-title">Bravo, tu as découvert tous les métiers !</h2>
+      <div class="carnet-stats">
+        <div><strong id="end-level">1</strong><span>Niveau final</span></div>
+        <div><strong id="end-xp">0</strong><span>XP total</span></div>
+        <div><strong id="end-jobs">0</strong><span>Métiers</span></div>
+      </div>
+      <a class="btn btn-v" href="./index.html">Revenir à l'accueil</a>
+    </section>
   </div>
 
   <script type="module" src="./src/main.ts"></script>
