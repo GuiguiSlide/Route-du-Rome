@@ -2,13 +2,15 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { ICarte } from "./ICarte";
 import type { Personnage } from "../game/Personnage";
-import type { Position } from "../game/types/Position";
+import { Position } from "../game/types/Position";
 import type { PersonnagePresentation } from "../data/personnages";
 
 export class Carte implements ICarte {
   private map: L.Map | null = null;
   private readonly markers = new Map<string, L.Marker>();
   private readonly presentations: Map<string, PersonnagePresentation>;
+  private joueurMarker: L.Marker | null = null;
+  private readonly clicCallbacks: Array<(position: Position) => void> = [];
 
   constructor(presentations: PersonnagePresentation[]) {
     this.presentations = new Map(
@@ -31,10 +33,36 @@ export class Carte implements ICarte {
       subdomains: "abc",
       attribution: "© OpenStreetMap",
     }).addTo(this.map);
+
+    this.map.on("click", (e: L.LeafletMouseEvent) => {
+      const position = new Position(e.latlng.lat, e.latlng.lng);
+      this.clicCallbacks.forEach((callback) => callback(position));
+    });
   }
 
   rafraichirTaille(): void {
     this.map?.invalidateSize();
+  }
+
+  onClicCarte(callback: (position: Position) => void): void {
+    this.clicCallbacks.push(callback);
+  }
+
+  afficherJoueur(position: Position): void {
+    if (!this.map) return;
+
+    if (this.joueurMarker) {
+      this.joueurMarker.setLatLng([position.lat, position.lng]);
+      return;
+    }
+
+    const icon = L.divIcon({
+      className: "",
+      html: `<div style="width:20px;height:20px;border-radius:50%;background:#FFCC52;border:3px solid #fff;box-shadow:0 0 12px rgba(255,204,82,0.8);"></div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+    this.joueurMarker = L.marker([position.lat, position.lng], { icon }).addTo(this.map);
   }
 
   afficherMarqueur(personnage: Personnage): void {
@@ -67,14 +95,17 @@ export class Carte implements ICarte {
     accompli = false
   ): L.DivIcon {
     const icon = presentation?.icon ?? "?";
-    const color = presentation?.color ?? "#8B5BB8";
+    const color = accompli ? "#4CAF50" : (presentation?.color ?? "#8B5BB8");
     const opacity = accompli ? "1" : "0.85";
+    const badge = accompli
+      ? `<div style="position:absolute;top:-4px;right:-4px;width:20px;height:20px;border-radius:50%;background:#4CAF50;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:bold;">✓</div>`
+      : "";
 
     return L.divIcon({
       className: "",
       html: `
-        <div style="display:flex;flex-direction:column;align-items:center;opacity:${opacity};">
-          <div style="width:44px;height:44px;border-radius:50%;border:3px solid ${color};background:rgba(18,14,36,0.9);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(0,0,0,0.5);">${icon}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;opacity:${opacity};position:relative;">
+          <div style="position:relative;width:44px;height:44px;border-radius:50%;border:3px solid ${color};background:rgba(18,14,36,0.9);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 12px rgba(0,0,0,0.5);">${icon}${badge}</div>
           <div style="background:rgba(18,14,36,0.9);border:1px solid ${color};color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;margin-top:3px;white-space:nowrap;font-family:Nunito,sans-serif;">${nom}</div>
         </div>`,
       iconSize: [60, 65],

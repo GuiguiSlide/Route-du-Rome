@@ -1,117 +1,84 @@
 import type { Quiz } from "../game/Quiz";
-import type { Question } from "../game/Question";
+import { closeDialogue } from "./EcranDialogue";
 
-type VerifierReponse = (questionId: string, reponseId: string) => boolean;
+type OnQuestionVue = (questionId: string) => void;
 type OnQuizEnd = () => void;
 
-const DELAI_FEEDBACK_MS = 1400;
-
 let quizCourant: Quiz | null = null;
-let questionIdx = 0;
-let verifierReponseCallback: VerifierReponse | null = null;
+let onQuestionVueCallback: OnQuestionVue | null = null;
 let onEndCallback: OnQuizEnd | null = null;
-let enAttente = false;
 
-export function startQuiz(quiz: Quiz, verifierReponse: VerifierReponse, onEnd: OnQuizEnd): void {
+export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQuizEnd): void {
   quizCourant = quiz;
-  questionIdx = 0;
-  verifierReponseCallback = verifierReponse;
+  onQuestionVueCallback = onQuestionVue;
   onEndCallback = onEnd;
-  enAttente = false;
 
-  renderProgress();
-  document.getElementById("quiz")?.classList.add("open");
-  afficherQuestion();
-}
+  document.getElementById("dlg-hint")?.style.setProperty("display", "none");
+  const continueBtn = document.getElementById("dlg-quiz-continue");
+  if (continueBtn) continueBtn.style.display = "inline-block";
 
-function afficherQuestion(): void {
-  if (!quizCourant) return;
-  const question = quizCourant.questions[questionIdx];
-  if (!question) return;
-
-  const questionEl = document.getElementById("quiz-question");
-  if (questionEl) questionEl.textContent = question.texte;
-
-  const feedbackEl = document.getElementById("quiz-feedback");
-  if (feedbackEl) {
-    feedbackEl.textContent = "";
-    feedbackEl.className = "quiz-feedback";
+  const replyEl = document.getElementById("dlg-quiz-reply");
+  if (replyEl) {
+    replyEl.textContent = "";
+    replyEl.classList.remove("show");
   }
 
-  renderReponses(question);
-  renderProgress();
+  renderChoices();
+  document.getElementById("dlg-quiz-choices")?.classList.add("show");
 }
 
-function renderReponses(question: Question): void {
-  const container = document.getElementById("quiz-reponses");
+function renderChoices(): void {
+  if (!quizCourant) return;
+  const container = document.getElementById("dlg-quiz-choices");
   if (!container) return;
 
   container.innerHTML = "";
-  question.reponses.forEach((reponse) => {
+  quizCourant.questions.forEach((question) => {
     const bouton = document.createElement("button");
-    bouton.className = "quiz-reponse";
-    bouton.textContent = reponse.texte;
-    bouton.addEventListener("click", () => choisirReponse(question.id, reponse.id, bouton));
+    bouton.type = "button";
+    bouton.className = "dlg-quiz-choice";
+    bouton.textContent = question.texte;
+    bouton.addEventListener("click", () => choisirQuestion(question.id, question.reponse, bouton));
     container.appendChild(bouton);
   });
 }
 
-function choisirReponse(questionId: string, reponseId: string, bouton: HTMLButtonElement): void {
-  if (enAttente || !verifierReponseCallback) return;
-  enAttente = true;
-
-  const correcte = verifierReponseCallback(questionId, reponseId);
-
-  document.querySelectorAll<HTMLButtonElement>(".quiz-reponse").forEach((btn) => {
-    btn.disabled = true;
+function choisirQuestion(questionId: string, reponse: string, bouton: HTMLButtonElement): void {
+  document.querySelectorAll<HTMLButtonElement>(".dlg-quiz-choice").forEach((btn) => {
+    btn.classList.remove("selected");
   });
-  bouton.classList.add(correcte ? "correcte" : "incorrecte");
+  bouton.classList.add("selected");
 
-  const feedbackEl = document.getElementById("quiz-feedback");
-  if (feedbackEl) {
-    feedbackEl.textContent = correcte ? "Bonne réponse !" : "Ce n'est pas ça.";
-    feedbackEl.className = "quiz-feedback " + (correcte ? "correcte" : "incorrecte");
+  const dialogueText = document.getElementById("dlg-txt");
+  if (dialogueText) dialogueText.textContent = reponse;
+
+  const replyEl = document.getElementById("dlg-quiz-reply");
+  if (replyEl) {
+    replyEl.textContent = "";
+    replyEl.classList.remove("show");
   }
 
-  setTimeout(() => {
-    enAttente = false;
-    avancer();
-  }, DELAI_FEEDBACK_MS);
-}
-
-function avancer(): void {
-  if (!quizCourant) return;
-  questionIdx++;
-
-  if (questionIdx >= quizCourant.questions.length) {
-    terminerQuiz();
-    return;
-  }
-
-  afficherQuestion();
+  onQuestionVueCallback?.(questionId);
 }
 
 function terminerQuiz(): void {
-  document.getElementById("quiz")?.classList.remove("open");
+  document.getElementById("dlg-quiz-choices")?.classList.remove("show");
+  document.getElementById("dlg-hint")?.style.setProperty("display", "flex");
+  const continueBtn = document.getElementById("dlg-quiz-continue");
+  if (continueBtn) continueBtn.style.display = "none";
+
+  closeDialogue();
+
   const callback = onEndCallback;
   quizCourant = null;
+  onQuestionVueCallback = null;
   onEndCallback = null;
-  verifierReponseCallback = null;
   callback?.();
 }
 
-function renderProgress(): void {
-  if (!quizCourant) return;
-  const progress = document.getElementById("quiz-progress");
-  if (!progress) return;
-  progress.textContent = `${questionIdx + 1} / ${quizCourant.questions.length}`;
-}
-
 export function bindQuizControls(): void {
-  document.getElementById("quiz-close")?.addEventListener("click", () => {
-    document.getElementById("quiz")?.classList.remove("open");
-    quizCourant = null;
-    onEndCallback = null;
-    verifierReponseCallback = null;
+  document.getElementById("dlg-quiz-continue")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    terminerQuiz();
   });
 }

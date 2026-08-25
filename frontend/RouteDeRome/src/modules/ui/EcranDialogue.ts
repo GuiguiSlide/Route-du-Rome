@@ -29,7 +29,6 @@ export function advanceDialogue(): void {
   const el = document.getElementById("dlg-txt");
   if (!el) return;
 
-  // Si le texte est en cours de frappe, on l'affiche en entier au lieu d'avancer
   if (el.dataset.typing === "1") {
     if (dlgTimer) clearInterval(dlgTimer);
     el.textContent = dlgLines[dlgIdx];
@@ -39,7 +38,6 @@ export function advanceDialogue(): void {
 
   dlgIdx++;
   if (dlgIdx >= dlgLines.length) {
-    closeDialogue();
     onEndCallback?.();
     return;
   }

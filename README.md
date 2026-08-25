@@ -25,3 +25,213 @@ Performance & optimisation : des temps de chargement maîtrisés et un poids ré
 - Tests : écrits et exécutables, avec une stratégie assumée.
 - Documentation : de conception et du code, en français.
 - Version installable : l'application en PWA, prête à être déployée.
+
+```
+Route-du-Rome
+├─ DOCS
+│  ├─ arborescence.md
+│  ├─ architecture.md
+│  ├─ commentcafonctionne.md
+│  ├─ conception.md
+│  ├─ devlog.md
+│  ├─ mcd
+│  ├─ mld
+│  ├─ objectifs_et_contraintes.md
+│  ├─ README.md
+│  ├─ reste_a_faire.md
+│  └─ uml
+│     └─ uml.md
+├─ frontend
+│  ├─ README.md
+│  └─ RouteDeRome
+│     ├─ dist
+│     │  ├─ assets
+│     │  │  ├─ img
+│     │  │  │  ├─ ClairePP.png
+│     │  │  │  ├─ EliaPP.png
+│     │  │  │  ├─ ElioPP.png
+│     │  │  │  ├─ FlorianPP.png
+│     │  │  │  ├─ JeannePP.png
+│     │  │  │  ├─ LaetitiaPP.png
+│     │  │  │  ├─ ManuPP.png
+│     │  │  │  ├─ MorganePP.png
+│     │  │  │  ├─ NathanPP.png
+│     │  │  │  ├─ SarahPP.png
+│     │  │  │  └─ SophiePP.png
+│     │  │  ├─ index-Btp5VGcP.css
+│     │  │  ├─ index-fQElA1ZH.js
+│     │  │  ├─ sounds
+│     │  │  │  ├─ mouettes.mp3
+│     │  │  │  ├─ Theme.mp3
+│     │  │  │  └─ waves.mp3
+│     │  │  └─ videos
+│     │  │     ├─ Claire.mp4
+│     │  │     ├─ Elia1.mp4
+│     │  │     ├─ Elio1.mp4
+│     │  │     ├─ Florian.mp4
+│     │  │     ├─ Jeanne.mp4
+│     │  │     ├─ Laetitia.mp4
+│     │  │     ├─ Manu.mp4
+│     │  │     ├─ Morgane1.mp4
+│     │  │     ├─ Nathan.mp4
+│     │  │     ├─ Sarah.mp4
+│     │  │     └─ Sophie.mp4
+│     │  ├─ favicon.svg
+│     │  ├─ icons.svg
+│     │  ├─ index.html
+│     │  ├─ jeu.css
+│     │  ├─ jeu.html
+│     │  └─ jeu.js
+│     ├─ index.html
+│     ├─ package-lock.json
+│     ├─ package.json
+│     ├─ public
+│     │  ├─ assets
+│     │  │  ├─ img
+│     │  │  │  ├─ ClairePP.png
+│     │  │  │  ├─ EliaPP.png
+│     │  │  │  ├─ ElioPP.png
+│     │  │  │  ├─ FlorianPP.png
+│     │  │  │  ├─ JeannePP.png
+│     │  │  │  ├─ LaetitiaPP.png
+│     │  │  │  ├─ ManuPP.png
+│     │  │  │  ├─ MorganePP.png
+│     │  │  │  ├─ NathanPP.png
+│     │  │  │  ├─ SarahPP.png
+│     │  │  │  └─ SophiePP.png
+│     │  │  ├─ sounds
+│     │  │  │  ├─ mouettes.mp3
+│     │  │  │  ├─ Theme.mp3
+│     │  │  │  └─ waves.mp3
+│     │  │  └─ videos
+│     │  │     ├─ Claire.mp4
+│     │  │     ├─ Elia1.mp4
+│     │  │     ├─ Elio1.mp4
+│     │  │     ├─ Florian.mp4
+│     │  │     ├─ Jeanne.mp4
+│     │  │     ├─ Laetitia.mp4
+│     │  │     ├─ Manu.mp4
+│     │  │     ├─ Morgane1.mp4
+│     │  │     ├─ Nathan.mp4
+│     │  │     ├─ Sarah.mp4
+│     │  │     └─ Sophie.mp4
+│     │  ├─ favicon.svg
+│     │  ├─ icons.svg
+│     │  ├─ jeu.css
+│     │  ├─ jeu.html
+│     │  └─ jeu.js
+│     ├─ src
+│     │  ├─ assets
+│     │  │  ├─ img
+│     │  │  │  ├─ ClairePP.png
+│     │  │  │  ├─ EliaPP.png
+│     │  │  │  ├─ ElioPP.png
+│     │  │  │  ├─ FlorianPP.png
+│     │  │  │  ├─ JeannePP.png
+│     │  │  │  ├─ LaetitiaPP.png
+│     │  │  │  ├─ ManuPP.png
+│     │  │  │  ├─ MorganePP.png
+│     │  │  │  ├─ NathanPP.png
+│     │  │  │  ├─ SarahPP.png
+│     │  │  │  └─ SophiePP.png
+│     │  │  ├─ sounds
+│     │  │  │  ├─ mouettes.mp3
+│     │  │  │  ├─ Theme.mp3
+│     │  │  │  └─ waves.mp3
+│     │  │  └─ videos
+│     │  │     ├─ Claire.mp4
+│     │  │     ├─ Elia1.mp4
+│     │  │     ├─ Elio1.mp4
+│     │  │     ├─ Florian.mp4
+│     │  │     ├─ Jeanne.mp4
+│     │  │     ├─ Laetitia.mp4
+│     │  │     ├─ Manu.mp4
+│     │  │     ├─ Morgane1.mp4
+│     │  │     ├─ Nathan.mp4
+│     │  │     ├─ Sarah.mp4
+│     │  │     └─ Sophie.mp4
+│     │  ├─ main.ts
+│     │  ├─ modules
+│     │  │  ├─ data
+│     │  │  │  ├─ dialogues.ts
+│     │  │  │  ├─ personnages.json
+│     │  │  │  ├─ personnages.ts
+│     │  │  │  └─ quizzes.ts
+│     │  │  ├─ game
+│     │  │  │  ├─ Badge.ts
+│     │  │  │  ├─ CarnetDeBord.ts
+│     │  │  │  ├─ Jeu.ts
+│     │  │  │  ├─ Joueur.ts
+│     │  │  │  ├─ Personnage.ts
+│     │  │  │  ├─ Question.ts
+│     │  │  │  ├─ Quete.ts
+│     │  │  │  ├─ Quiz.ts
+│     │  │  │  ├─ Reponse.ts
+│     │  │  │  └─ types
+│     │  │  │     ├─ EtatQuete.ts
+│     │  │  │     └─ Position.ts
+│     │  │  ├─ map
+│     │  │  │  ├─ carte.ts
+│     │  │  │  ├─ locations.ts
+│     │  │  │  └─ npc.ts
+│     │  │  ├─ ui
+│     │  │  │  ├─ composants
+│     │  │  │  │  ├─ Bouton.ts
+│     │  │  │  │  ├─ HeroPopup.ts
+│     │  │  │  │  └─ index.ts
+│     │  │  │  ├─ EcranCarte.ts
+│     │  │  │  ├─ EcranDialogue.ts
+│     │  │  │  ├─ EcranFin.ts
+│     │  │  │  └─ EcranSelection.ts
+│     │  │  └─ utils
+│     │  │     ├─ accessibility.ts
+│     │  │     ├─ events.ts
+│     │  │     ├─ media.ts
+│     │  │     └─ storage.ts
+│     │  ├─ style.css
+│     │  └─ tests
+│     │     ├─ integration
+│     │     │  └─ ui.test.ts
+│     │     └─ unit
+│     │        └─ game.test.ts
+│     └─ tsconfig.json
+├─ old
+│  ├─ ancienne_architecture.md
+│  ├─ assets
+│  │  ├─ img
+│  │  │  ├─ ClairePP.png
+│  │  │  ├─ EliaPP.png
+│  │  │  ├─ ElioPP.png
+│  │  │  ├─ FlorianPP.png
+│  │  │  ├─ JeannePP.png
+│  │  │  ├─ LaetitiaPP.png
+│  │  │  ├─ ManuPP.png
+│  │  │  ├─ MorganePP.png
+│  │  │  ├─ NathanPP.png
+│  │  │  ├─ SarahPP.png
+│  │  │  └─ SophiePP.png
+│  │  ├─ sounds
+│  │  │  ├─ mouettes.mp3
+│  │  │  ├─ Theme.mp3
+│  │  │  └─ waves.mp3
+│  │  └─ videos
+│  │     ├─ Claire.mp4
+│  │     ├─ Elia1.mp4
+│  │     ├─ Elio1.mp4
+│  │     ├─ Florian.mp4
+│  │     ├─ Jeanne.mp4
+│  │     ├─ Laetitia.mp4
+│  │     ├─ Manu.mp4
+│  │     ├─ Morgane1.mp4
+│  │     ├─ Nathan.mp4
+│  │     ├─ Sarah.mp4
+│  │     └─ Sophie.mp4
+│  ├─ index.css
+│  ├─ index.html
+│  ├─ index.js
+│  ├─ jeu.css
+│  ├─ jeu.html
+│  └─ jeu.js
+└─ README.md
+
+```

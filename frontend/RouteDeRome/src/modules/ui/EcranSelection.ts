@@ -2,8 +2,7 @@ import { getHeroById, type Character } from "../data/personnages";
 import { playBackgroundAudio } from "../utils/media";
 import { saveSelectedHero } from "../utils/storage";
 import { fillHeroPopup, showHeroPopup } from "./composants/HeroPopup";
-import { startDialogue } from "./EcranDialogue";
-
+import { startDialogue, closeDialogue } from "./EcranDialogue";
 export function bindHeroCards(): void {
   document.getElementById("card-elio")?.addEventListener("click", () => launchHero("elio"));
   document.getElementById("card-elia")?.addEventListener("click", () => launchHero("elia"));
@@ -49,11 +48,15 @@ function startVideoSequence(character: Character, portraitSrc: string): void {
   const vid = document.getElementById("the-video") as HTMLVideoElement | null;
   const vw = document.getElementById("vid-wrap");
   const skipBtn = document.getElementById("skip-btn");
+
   if (!vid || !vw) return;
 
   if (!character.video) {
     // Pas de vidéo pour ce personnage : on passe directement au dialogue
-    startDialogue(character.dialogues.intro, () => showHeroPopup());
+    startDialogue(character.dialogues.intro, () => {
+      closeDialogue();
+      showHeroPopup();
+    });
     return;
   }
 
@@ -61,7 +64,7 @@ function startVideoSequence(character: Character, portraitSrc: string): void {
   vid.load();
 
   const reveal = () => {
-    vid.play().catch(() => {});
+    vid.play().catch(() => { });
     requestAnimationFrame(() => {
       vw.classList.add("show");
       skipBtn?.classList.add("show");

@@ -4,7 +4,7 @@ import { Personnage } from "./Personnage";
 import { Quete } from "./Quete";
 import { Quiz } from "./Quiz";
 
-const SEUIL_PROXIMITE_METRES = 300;
+const SEUIL_PROXIMITE_METRES = 1500;
 
 export class Jeu {
   private readonly joueur: Joueur;
@@ -38,12 +38,12 @@ export class Jeu {
     return personnage.getQuiz();
   }
 
-  repondre(quizId: string, questionId: string, reponseId: string): boolean {
+  marquerQuestionVue(quizId: string, questionId: string): void {
     const personnage = this.personnages.find((p) => p.getQuiz().id === quizId);
     if (!personnage) {
       throw new Error(`Quiz introuvable: ${quizId}`);
     }
-    return personnage.getQuiz().verifierReponse(questionId, reponseId);
+    personnage.getQuiz().marquerVue(questionId);
   }
 
   validerQuete(queteId: string): void {
@@ -56,6 +56,14 @@ export class Jeu {
     this.joueur.ajouterBadge(
       new Badge(`badge-${quete.personnage.id}`, quete.personnage.metier, quete.personnage.id)
     );
+  }
+
+  terminerRencontre(personnageId: string): void {
+    const quete = this.getQueteDuPersonnage(personnageId);
+    if (!quete) {
+      throw new Error(`Aucune quête pour le personnage: ${personnageId}`);
+    }
+    this.validerQuete(quete.id);
   }
 
   verifierProximite(): Personnage | null {

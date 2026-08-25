@@ -43,9 +43,8 @@ export function chargerPresentations(characters: Character[]): PersonnagePresent
 }
 export interface QuizQuestion {
   id: string;
-  question: string;
-  answers: string[];
-  correctIndex: number;
+  texte: string;
+  reponse: string;
 }
 export interface CharacterLocation {
   lat: number;

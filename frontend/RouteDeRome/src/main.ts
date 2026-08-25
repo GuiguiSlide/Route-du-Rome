@@ -3,6 +3,7 @@ import { bindHeroCards, bindVideoControls } from "./modules/ui/EcranSelection";
 import { advanceDialogue, closeDialogue } from "./modules/ui/EcranDialogue";
 import { closeHeroPopup } from "./modules/ui/composants/HeroPopup";
 import { EcranCarte } from "./modules/ui/EcranCarte";
+import { bindQuizControls } from "./modules/ui/EcranQuiz";
 
 function bindDialogueControls(): void {
   const dlg = document.getElementById("dlg");
@@ -10,6 +11,7 @@ function bindDialogueControls(): void {
 
   dlg.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
+    if (target.closest("#dlg-quiz-choices, #dlg-quiz-continue")) return;
     if (target.closest(".dlg-x")) {
       closeDialogue();
       return;
@@ -40,6 +42,7 @@ function init(): void {
   bindVideoControls();
   bindDialogueControls();
   bindHeroPopupControls();
+  bindQuizControls();
 }
 
 init();

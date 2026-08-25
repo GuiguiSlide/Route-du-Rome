@@ -10,7 +10,6 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Nunito:wght@400;700;800;900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/manifest.json">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/icon-192.png">
   <meta name="theme-color" content="#1D1E3C">
@@ -18,13 +17,38 @@
 </head>
 
 <body>
-  <div id="flash"></div>
+  <!-- Transition entre les écrans -->
+  <div id="flash" aria-hidden="true"></div>
 
+  <!-- Dialogue partagé par l'introduction et les rencontres -->
+  <div id="dlg">
+    <div class="dlg-head">
+      <img class="dlg-portrait" id="dlg-portrait" src="assets/img/ElioPP.png" alt="">
+      <div class="dlg-info">
+        <div class="dlg-nname" id="dlg-nname">Élio</div>
+        <div class="dlg-nrole" id="dlg-nrole">Explorateur · France Travail 35</div>
+      </div>
+      <div class="dlg-tag">La Route du Rome</div>
+      <div class="dlg-dots" id="dlg-dots"></div>
+      <button class="dlg-x" id="dlg-close">&times;</button>
+    </div>
+    <div class="dlg-body">
+      <div id="dlg-txt"></div>
+      <div id="dlg-quiz-choices"></div>
+      <div id="dlg-quiz-reply"></div>
+    </div>
+    <div class="dlg-foot">
+      <div class="dlg-hint" id="dlg-hint"><span class="dkey">Espace</span>&nbsp;·&nbsp;<span
+          class="dkey">Clic</span>&nbsp;pour continuer</div>
+      <button class="btn btn-v" id="dlg-quiz-continue" style="display:none;">Continuer</button>
+    </div>
+  </div>
+  <!-- Ambiance sonore -->
   <audio id="bg-music" src="assets/sounds/theme.mp3" loop preload="auto"></audio>
   <audio id="waves" src="assets/sounds/waves.mp3" loop preload="auto"></audio>
   <audio id="seagull" src="assets/sounds/mouettes.mp3" preload="auto"></audio>
 
-  <!-- ECRAN CHOIX PERSONNAGE -->
+  <!-- Écran 1 : choix du personnage -->
   <div id="screen-pick">
     <div class="ft-badge">France Travail · Ille-et-Vilaine</div>
     <div class="game-title">LA ROUTE<br><span>DU ROME</span></div>
@@ -58,7 +82,7 @@
     <div class="pick-hint">Clique sur ton personnage pour commencer</div>
   </div>
 
-  <!-- ECRAN JEU / INTRO -->
+  <!-- Écran 2 : introduction du personnage -->
   <div id="screen-game">
     <div id="intro-map"></div>
 
@@ -72,25 +96,7 @@
       <div id="skip-btn"><button id="skip-btn-action">Passer</button></div>
     </div>
 
-    <div id="dlg">
-      <div class="dlg-head">
-        <img class="dlg-portrait" id="dlg-portrait" src="assets/img/ElioPP.png" alt="">
-        <div class="dlg-info">
-          <div class="dlg-nname" id="dlg-nname">Élio</div>
-          <div class="dlg-nrole" id="dlg-nrole">Explorateur · France Travail 35</div>
-        </div>
-        <div class="dlg-tag">La Route du Rome</div>
-        <div class="dlg-dots" id="dlg-dots"></div>
-        <button class="dlg-x" id="dlg-close">&times;</button>
-      </div>
-      <div class="dlg-body">
-        <div id="dlg-txt"></div>
-      </div>
-      <div class="dlg-foot">
-        <div class="dlg-hint"><span class="dkey">Espace</span>&nbsp;·&nbsp;<span class="dkey">Clic</span>&nbsp;pour
-          continuer</div>
-      </div>
-    </div>
+
 
     <div id="hero-popup">
       <div class="pop-card">
@@ -121,23 +127,16 @@
       </div>
     </div>
   </div>
-  <!-- ECRAN CARTE DE JEU -->
+  <!-- Écran 3 : carte et rencontres -->
   <div id="screen-map">
-    <div id="quiz">
-      <div class="quiz-card">
-        <div class="quiz-head">
-          <div class="quiz-progress" id="quiz-progress"></div>
-          <button class="dlg-x" id="quiz-close">&times;</button>
-        </div>
-        <div class="quiz-body">
-          <div id="quiz-question"></div>
-          <div id="quiz-reponses"></div>
-        </div>
-        <div class="quiz-feedback" id="quiz-feedback"></div>
-      </div>
-    </div>
     <div id="map"></div>
+
+    <!-- Vidéo de rencontre : placée au-dessus de la carte et sous le dialogue -->
+    <div id="encounter-video-wrap" aria-hidden="true">
+      <video id="encounter-video" playsinline preload="auto"></video>
+    </div>
   </div>
+
   <script type="module" src="./src/main.ts"></script>
 </body>
 
