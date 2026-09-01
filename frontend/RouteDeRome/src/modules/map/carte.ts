@@ -22,8 +22,9 @@ export class Carte implements ICarte {
   // Initialise la carte avec les données de présentation des personnages
   // La Map permet de retrouver instantanément l'icône et la couleur par identifiant.
   constructor(presentations: PersonnagePresentation[]) {
-      presentations.map((presentation) => [presentation.personnageId, presentation])
-    );
+      this.presentations = new Map(
+        presentations.map((presentation) => [presentation.personnageId, presentation])
+      );
   }
 
   // Initialise la carte Leaflet avec centre sur Rennes et configuration standard
