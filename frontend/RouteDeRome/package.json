@@ -1,7 +1,10 @@
 {
   "name": "routederome",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "description": "La Route du Rome - Une aventure pédagogique à la découverte des métiers de l'Ille-et-Vilaine",
+  "author": "La Route du Rome",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,0 +1,67 @@
+# Configuration Netlify pour Progressive Web App
+
+[build]
+  command = "npm run build"
+  functions = "netlify/functions"
+  publish = "dist"
+
+# Redirection pour SPA (Single Page Application)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers pour le Service Worker
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "max-age=0, must-revalidate, no-cache, no-store"
+    Service-Worker-Allowed = "/"
+
+# Headers pour le manifest
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "max-age=86400, public, must-revalidate"
+    Content-Type = "application/json"
+
+# Headers pour les fichiers HTML
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "max-age=0, must-revalidate, no-cache, no-store"
+
+# Headers de sécurité globaux
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; media-src 'self' data:; object-src 'none';"
+
+# Optimisations de performance
+[[headers]]
+  for = "/(*.js|*.css|*.jpg|*.jpeg|*.png|*.gif|*.svg|*.woff|*.woff2|*.ttf|*.eot|*.ico)"
+  [headers.values]
+    Cache-Control = "max-age=31536000, public, immutable"
+
+# CORS pour les polices
+[[headers]]
+  for = "/(*.woff|*.woff2|*.ttf|*.eot)"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+
+# Variables d'environnement (si nécessaire)
+[context.production.environment]
+  NODE_ENV = "production"
+  VITE_APP_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
+  VITE_APP_ENV = "preview"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "production"
+  VITE_APP_ENV = "staging"

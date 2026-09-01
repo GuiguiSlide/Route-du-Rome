@@ -1,0 +1,82 @@
+# Configuration Apache pour Progressive Web App
+# À placer dans le répertoire dist/ lors du déploiement
+
+# Activer mod_rewrite pour les SPA (Single Page Application)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # Si la requête ne correspond pas à un fichier ou dossier existant
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Rediriger vers index.html pour les routes non trouvées
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>
+
+# Définir les types MIME corrects
+<IfModule mod_mime.c>
+  # JSON pour les manifests
+  AddType application/json .json
+  # WebManifest
+  AddType application/manifest+json .webmanifest
+  # Service Workers
+  AddType text/javascript .js
+</IfModule>
+
+# Headers de cache appropriés pour PWA
+<IfModule mod_headers.c>
+  # Service Worker - Ne JAMAIS le mettre en cache navigateur
+  <FilesMatch "^sw\.js$">
+    Header set Cache-Control "max-age=0, must-revalidate, no-cache, no-store"
+    Header set Service-Worker-Allowed "/"
+  </FilesMatch>
+  
+  # Manifest.json - Cache court (1 jour)
+  <FilesMatch "\.json$">
+    Header set Cache-Control "max-age=86400, public, must-revalidate"
+  </FilesMatch>
+  
+  # Fichiers HTML - Ne pas mettre en cache
+  <FilesMatch "\.html?$">
+    Header set Cache-Control "max-age=0, must-revalidate, no-cache, no-store"
+    Header set Content-Type "text/html; charset=utf-8"
+  </FilesMatch>
+  
+  # Assets statiques (CSS, JS, images) - Cache long (1 an)
+  <FilesMatch "\.(css|js|jpg|jpeg|png|gif|svg|woff|woff2|ttf|eot|ico)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+  
+  # Audio/Vidéo - Cache long
+  <FilesMatch "\.(mp3|mp4|webm|ogg|wav)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </FilesMatch>
+  
+  # CORS headers pour les ressources
+  <FilesMatch "\.(ttf|otf|eot|woff|woff2)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+</IfModule>
+
+# Gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Sécurité
+<IfModule mod_headers.c>
+  # Éviter le clickjacking
+  Header always set X-Frame-Options "SAMEORIGIN"
+  
+  # Prévention du MIME-sniffing
+  Header always set X-Content-Type-Options "nosniff"
+  
+  # Sécurité XSS
+  Header always set X-XSS-Protection "1; mode=block"
+  
+  # Referrer Policy
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  
+  # Politique de sécurité du contenu
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; media-src 'self' data:; object-src 'none';"
+</IfModule>
