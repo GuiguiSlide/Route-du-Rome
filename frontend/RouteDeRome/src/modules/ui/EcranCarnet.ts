@@ -1,5 +1,9 @@
+// Module pour l'affichage du carnet de bord du joueur
+// Montre les badges, le niveau, l'XP et la progression en métiers découverts
+
 import type { Joueur } from "../game/Joueur";
 
+// Affiche le carnet de bord avec les données actuelles du joueur
 export function afficherCarnet(joueur: Joueur): void {
   const overlay = document.getElementById("carnet-overlay");
   const badges = document.getElementById("carnet-badges");
@@ -25,11 +29,13 @@ export function afficherCarnet(joueur: Joueur): void {
   overlay.classList.add("show");
 }
 
+// Ferme le carnet de bord
 // Le carnet est un overlay indépendant : le jeu reste vivant derrière lui.
 export function fermerCarnet(): void {
   document.getElementById("carnet-overlay")?.classList.remove("show");
 }
 
+// Configure les écouteurs pour les controles du carnet
 // Utilise un événement DOM pour que le bouton reste découplé de l'instance de Jeu.
 export function bindCarnetControls(): void {
   document.getElementById("carnet-btn")?.addEventListener("click", () => {

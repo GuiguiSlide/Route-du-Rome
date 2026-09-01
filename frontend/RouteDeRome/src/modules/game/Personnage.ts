@@ -1,3 +1,6 @@
+// Classe représentant un personnage du jeu (héros ou professionnel)
+// Contient les informations du personnage et gère l'état de rencontre
+
 import { Position } from "./types/Position";
 import { Quiz } from "./Quiz";
 
@@ -9,8 +12,10 @@ export class Personnage {
   readonly position: Position | null;
   readonly videoIntro: string | null;
   private readonly quiz: Quiz;
+  // Indique si le personnage a déjà été rencontré
   private dejaRencontre: boolean;
 
+  // Initialise un personnage avec tous ses détails
   constructor(
     id: string,
     nom: string,
@@ -31,14 +36,17 @@ export class Personnage {
     this.dejaRencontre = dejaRencontre;
   }
 
+  // Retourne le quiz associé au personnage
   getQuiz(): Quiz {
     return this.quiz;
   }
 
+  // Enregistre que le personnage a été rencontré
   marquerRencontre(): void {
     this.dejaRencontre = true;
   }
 
+  // Vérifie si le personnage a déjà été rencontré
   aEteRencontre(): boolean {
     return this.dejaRencontre;
   }

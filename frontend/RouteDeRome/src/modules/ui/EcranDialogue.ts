@@ -1,10 +1,16 @@
+// Module de gestion du système de dialogue
+// Gère l'affichage typé des lignes de dialogue avec avancemé au clic
+
+// Type pour le callback de fin de dialogue
 type OnDialogueEnd = () => void;
 
+// État du dialogue
 let dlgLines: string[] = [];
 let dlgIdx = 0;
 let dlgTimer: ReturnType<typeof setInterval> | null = null;
 let onEndCallback: OnDialogueEnd | null = null;
 
+// Commence un nouveau dialogue avec des lignes de texte
 export function startDialogue(lines: string[], onEnd: OnDialogueEnd): void {
   dlgLines = lines;
   dlgIdx = 0;
@@ -25,6 +31,7 @@ export function startDialogue(lines: string[], onEnd: OnDialogueEnd): void {
   typeLine(dlgLines[0]);
 }
 
+// Avance le dialogue : termine l'animation de frappe ou passe à la ligne suivante
 // Un clic termine d'abord l'animation de frappe, puis avance réellement la conversation.
 export function advanceDialogue(): void {
   const el = document.getElementById("dlg-txt");
@@ -52,6 +59,7 @@ export function advanceDialogue(): void {
   typeLine(dlgLines[dlgIdx]);
 }
 
+// Anime le typé d'une ligne de texte caractère par caractère
 // Le timer est conservé au niveau du module pour garantir une seule frappe active.
 function typeLine(txt: string): void {
   if (dlgTimer) clearInterval(dlgTimer);
@@ -73,6 +81,7 @@ function typeLine(txt: string): void {
   }, 24);
 }
 
+// Ferme le dialogue et arrête l'animation de frappe
 export function closeDialogue(): void {
   document.getElementById("dlg")?.classList.remove("open");
   if (dlgTimer) clearInterval(dlgTimer);

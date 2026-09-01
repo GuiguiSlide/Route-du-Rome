@@ -1,3 +1,6 @@
+// Module de gestion de l'écran principal de la carte
+// Orchestre l'affichage de la carte, les rencontres et la transition vers l'écran final
+
 import { Carte } from "../map/Carte";
 import { creerPersonnages } from "../game/PersonnageFactory";
 import { chargerPresentations, chargerContenus } from "../data/personnages";
@@ -18,6 +21,7 @@ export class EcranCarte {
   private jeu: Jeu | null = null;
   private contenus: readonly PersonnageContenu[] = [];
 
+  // Affiche l'écran de carte et initialise le jeu
   // Construit la partie complète et relie la carte aux callbacks de rencontre.
   public afficher(): void {
     document.getElementById("screen-game")?.classList.remove("visible");
@@ -48,6 +52,7 @@ export class EcranCarte {
     this.carte.onClicCarte((position) => this.gererClicCarte(position));
   }
 
+  // Gère le clic sur la carte et déclenche une rencontre si applicable
   // Un clic devient une rencontre seulement si le joueur est dans le rayon métier défini par Jeu.
   private gererClicCarte(position: Position): void {
     if (!this.jeu || !this.carte) return;
@@ -88,6 +93,7 @@ export class EcranCarte {
     });
   }
 
+  // Termine une rencontre et vérifie si le jeu est fini
   // Le callback du quiz déclenche les récompenses, puis éventuellement la fin globale.
   private terminerRencontre(personnageId: string): void {
     this.jeu?.terminerRencontre(personnageId);
@@ -100,6 +106,7 @@ export class EcranCarte {
     }
   }
 
+  // Affiche la vidéo d'introduction d'une rencontre
   // La vidéo est une couche DOM au-dessus de la carte; le dialogue reste au premier plan.
   private afficherVideoRencontre(videoUrl: string | null): void {
     const wrap = document.getElementById("encounter-video-wrap");
@@ -112,6 +119,7 @@ export class EcranCarte {
     wrap.classList.add("show");
   }
 
+  // Masque la vidéo de rencontre et l'arrête
   private masquerVideoRencontre(): void {
     const wrap = document.getElementById("encounter-video-wrap");
     const video = document.getElementById("encounter-video") as HTMLVideoElement | null;

@@ -1,13 +1,19 @@
+// Module pour l'écran de sélection des héros
+// Gère le choix du héros (Elio ou Elia) et la lecture de la vidéo d'introduction
+
 import { getHeroById, type Character } from "../data/personnages";
 import { playBackgroundAudio } from "../utils/media";
 import { saveSelectedHero } from "../utils/storage";
 import { fillHeroPopup, showHeroPopup } from "./composants/HeroPopup";
 import { startDialogue, closeDialogue } from "./EcranDialogue";
+
+// Configure les écouteurs pour les cartes de sélection des héros
 export function bindHeroCards(): void {
   document.getElementById("card-elio")?.addEventListener("click", () => launchHero("elio"));
   document.getElementById("card-elia")?.addEventListener("click", () => launchHero("elia"));
 }
 
+// Lance le héros sélectionné : enregistre, affiche la popup et lance la vidéo
 // Une sélection prépare les données du héros, puis lance l'introduction vidéo.
 function launchHero(id: string): void {
   const character = getHeroById(id);
@@ -25,6 +31,7 @@ function launchHero(id: string): void {
   transitionToGameScreen(character);
 }
 
+// Récupère le chemin de l'image du portrait du héros
 // L'image du DOM est préférée pour conserver le chemin résolu par le navigateur.
 function getPortraitSrc(character: Character): string {
   const imgEl = document.getElementById("img-" + character.id) as HTMLImageElement | null;
@@ -34,6 +41,7 @@ function getPortraitSrc(character: Character): string {
   return character.portrait;
 }
 
+// Effectue la transition vers l'écran de jeu
 // Le délai laisse l'animation de transition se terminer avant d'afficher la vidéo.
 function transitionToGameScreen(character: Character): void {
   const flash = document.getElementById("flash");
@@ -47,6 +55,7 @@ function transitionToGameScreen(character: Character): void {
   }, 300);
 }
 
+// Lance la séquence vidéo et de dialogue d'introduction
 // Le dialogue est lancé après le chargement vidéo, avec un délai de respiration visuelle.
 function startVideoSequence(character: Character): void {
   const vid = document.getElementById("the-video") as HTMLVideoElement | null;
@@ -96,10 +105,12 @@ function startVideoSequence(character: Character): void {
   }, 800);
 }
 
+// Configure les écouteurs pour les controles de la vidéo
 export function bindVideoControls(): void {
   document.getElementById("skip-btn-action")?.addEventListener("click", skipVideo);
 }
 
+// Passe la vidéo d'introduction
 // Avancer à la fin permet de laisser le dialogue prendre la place de l'introduction.
 function skipVideo(): void {
   const vid = document.getElementById("the-video") as HTMLVideoElement | null;

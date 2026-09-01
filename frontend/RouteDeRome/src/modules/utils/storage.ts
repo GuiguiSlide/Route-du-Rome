@@ -1,5 +1,9 @@
+// Module pour la gestion du stockage local du navigateur
+// Enregistre et récupère les données persistantes du joueur
+
 const HERO_STORAGE_KEY = "rdr_hero";
 
+// Enregistre l'ID du héros sélectionné dans le stockage local
 export function saveSelectedHero(key: string): void {
   try {
     localStorage.setItem(HERO_STORAGE_KEY, key);
@@ -8,6 +12,7 @@ export function saveSelectedHero(key: string): void {
   }
 }
 
+// Récupère l'ID du héros précédemment sélectionné
 export function getSelectedHero(): string | null {
   try {
     return localStorage.getItem(HERO_STORAGE_KEY);

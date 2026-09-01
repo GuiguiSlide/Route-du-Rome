@@ -1,5 +1,10 @@
+// Module pour la gestion des médias (audio et création d'ambiance sonore)
+// Gère la musique de fond, les vagues et les cris de mouettes aléatoires
+
+// Timer pour les cris de mouettes
 let seagullTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Lance la musique de fond et les sons d'ambiance
 // Les médias sont lancés après un clic utilisateur pour respecter les règles d'autoplay.
 export function playBackgroundAudio(): void {
   const music = document.getElementById("bg-music") as HTMLAudioElement | null;
@@ -16,6 +21,7 @@ export function playBackgroundAudio(): void {
   }
 }
 
+// Lance une séquence aléatoire de cris de mouettes
 // Programme un cri court et aléatoire, puis recommence après une nouvelle attente.
 export function startSeagulls(): void {
   const seagull = document.getElementById("seagull") as HTMLAudioElement | null;

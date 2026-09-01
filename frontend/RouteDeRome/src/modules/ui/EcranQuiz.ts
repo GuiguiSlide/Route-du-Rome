@@ -1,13 +1,19 @@
+// Module de gestion du système de quiz
+// Gère l'affichage des questions et le suivi des réponses choisies
+
 import type { Quiz } from "../game/Quiz";
 import { closeDialogue } from "./EcranDialogue";
 
+// Types pour les callbacks
 type OnQuestionVue = (questionId: string) => void;
 type OnQuizEnd = () => void;
 
+// État du quiz
 let quizCourant: Quiz | null = null;
 let onQuestionVueCallback: OnQuestionVue | null = null;
 let onEndCallback: OnQuizEnd | null = null;
 
+// Commence un quiz avec des callbacks pour les événements
 // Ces callbacks relient l'interface aux objets métier sans faire entrer le DOM dans le domaine.
 export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQuizEnd): void {
   quizCourant = quiz;
@@ -31,6 +37,7 @@ export function startQuiz(quiz: Quiz, onQuestionVue: OnQuestionVue, onEnd: OnQui
   document.getElementById("dlg-quiz-choices")?.classList.add("show");
 }
 
+// Affiche les choix de questions disponibles
 // Les boutons sont reconstruits à chaque quiz pour éviter de conserver ceux d'une ancienne rencontre.
 function renderChoices(): void {
   if (!quizCourant) return;
@@ -48,6 +55,7 @@ function renderChoices(): void {
   });
 }
 
+// Gère le choix d'une question et affiche sa réponse
 // Une réponse remplace le texte du dialogue; la question est ensuite mémorisée dans le Quiz.
 function choisirQuestion(questionId: string, reponse: string, bouton: HTMLButtonElement): void {
   document.querySelectorAll<HTMLButtonElement>(".dlg-quiz-choice").forEach((btn) => {
@@ -72,6 +80,7 @@ function choisirQuestion(questionId: string, reponse: string, bouton: HTMLButton
   }
 }
 
+// Valide et termine le quiz
 // La validation est refusée tant que le Quiz ne connaît pas les trois questions consultées.
 function terminerQuiz(): void {
   if (!quizCourant?.estComplet()) return;
@@ -90,6 +99,7 @@ function terminerQuiz(): void {
   callback?.();
 }
 
+// Configure les écouteurs pour les controles du quiz
 export function bindQuizControls(): void {
   document.getElementById("dlg-quiz-continue")?.addEventListener("click", (event) => {
     event.stopPropagation();

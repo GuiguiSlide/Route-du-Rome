@@ -1,3 +1,6 @@
+// Module pour l'affichage de l'écran final du jeu
+// Montre les statistiques finales du joueur quand toutes les quêtes sont terminées
+
 import type { Joueur } from "../game/Joueur";
 
 export class EcranFin {

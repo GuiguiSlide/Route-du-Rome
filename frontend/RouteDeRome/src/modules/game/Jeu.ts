@@ -1,9 +1,14 @@
+// Classe représentant le cœur du jeu
+// Gère l'orchestration entre le joueur, les personnages et les quêtes
+// Centralise la logique métier comme les rencontres et la validation des quêtes
+
 import { Badge } from "./Badge";
 import { Joueur } from "./Joueur";
 import { Personnage } from "./Personnage";
 import { Quete } from "./Quete";
 import { Quiz } from "./Quiz";
 
+// Seuil de proximité pour déclencher une rencontre avec un professionnel (en mètres)
 const SEUIL_PROXIMITE_METRES = 1500;
 
 export class Jeu {
@@ -11,6 +16,7 @@ export class Jeu {
   private readonly personnages: Personnage[];
   private readonly quetes: Quete[];
 
+  // Initialise le jeu avec un joueur, les personnages et les quêtes disponibles
   constructor(joueur: Joueur, personnages: Personnage[], quetes: Quete[]) {
     this.joueur = joueur;
     this.personnages = personnages;
@@ -32,7 +38,7 @@ export class Jeu {
     return personnage;
   }
 
-  // Une rencontre démarre à la fois le personnage et la quête associée.
+  // Une rencontre démarre à la fois le personnage et la quête associée
   parlerA(personnageId: string): Quiz {
     const personnage = this.selectionnerPersonnage(personnageId);
     personnage.marquerRencontre();

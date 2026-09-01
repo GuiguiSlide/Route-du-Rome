@@ -1,3 +1,6 @@
+// Module adaptateur pour transformer les données JSON en objets métier
+// Centralise la création de personnages et leurs dépendances
+
 import { Personnage } from "./Personnage";
 import { Position } from "./types/Position";
 import { Quiz } from "./Quiz";
@@ -31,12 +34,14 @@ function creerPosition(character: Character): Position | null {
   return new Position(character.location.lat, character.location.lng);
 }
 
+// Crée un quiz pour un personnage à partir des données JSON
 // Le préfixe d'id garantit qu'un quiz reste rattaché à son personnage.
 function creerQuiz(character: Character): Quiz {
   const questions = character.quiz.map(creerQuestion);
   return new Quiz(`${character.id}-quiz`, questions);
 }
 
-function creerQuestion(quizQuestion: QuizQuestion): Question {
+// Crée une question à partir des données de quiz
+  function creerQuestion(quizQuestion: QuizQuestion): Question {
   return new Question(quizQuestion.id, quizQuestion.texte, quizQuestion.reponse);
 }

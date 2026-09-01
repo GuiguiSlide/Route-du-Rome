@@ -1,3 +1,5 @@
+// Interface pour les quiz des personnages
+// Contient les questions avec leurs réponses possibles et la bonne réponse
 export interface QuizDonnees {
   id: string;
   personnageId: string;
@@ -9,4 +11,5 @@ export interface QuizDonnees {
   }[];
 }
 
+// Liste des quiz disponibles (tableau vide en attente de données)
 export const QUIZZES: QuizDonnees[] = []
